@@ -1,0 +1,226 @@
+x-healthcheck: &python-healthcheck
+  test: ["CMD", "python", "-c", "import socket; s=socket.socket(socket.AF_INET,socket.SOCK_DGRAM); s.settimeout(2); s.sendto(b'\\x00\\x01\\x01\\x00\\x00\\x01\\x00\\x00\\x00\\x00\\x00\\x00\\x04test\\x00\\x00\\x01\\x00\\x01', ('127.0.0.1',53)); s.recvfrom(512); s.close()"]
+  interval: 5s
+  timeout: 3s
+  retries: 10
+  start_period: 5s
+
+networks:
+  lab_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/24
+
+services:
+  authzone:
+    build: ./authzone
+    container_name: authzone
+    networks:
+      lab_net:
+        ipv4_address: 172.28.0.10
+    volumes:
+      - ./authzone/logs:/var/log/authzone
+    healthcheck: *python-healthcheck
+
+  t01-bind-open:
+    build: ./targets/t01
+    container_name: t01-bind-open
+    networks:
+      lab_net:
+        ipv4_address: 172.28.0.101
+    depends_on:
+      authzone:
+        condition: service_healthy
+    healthcheck: *python-healthcheck
+
+  t02-bind-closed:
+    build: ./targets/t02
+    container_name: t02-bind-closed
+    networks:
+      lab_net:
+        ipv4_address: 172.28.0.102
+    healthcheck: *python-healthcheck
+
+  t03-unbound-open:
+    build: ./targets/t03
+    container_name: t03-unbound-open
+    networks:
+      lab_net:
+        ipv4_address: 172.28.0.103
+    depends_on:
+      authzone:
+        condition: service_healthy
+    healthcheck: *python-healthcheck
+
+  t04-unbound-refused:
+    build: ./targets/t04
+    container_name: t04-unbound-refused
+    networks:
+      lab_net:
+        ipv4_address: 172.28.0.104
+    healthcheck: *python-healthcheck
+
+  t05-kresd-open:
+    build: ./targets/t05
+    container_name: t05-kresd-open
+    networks:
+      lab_net:
+        ipv4_address: 172.28.0.105
+    depends_on:
+      authzone:
+        condition: service_healthy
+    healthcheck: *python-healthcheck
+
+  t06-dnsmasq:
+    build: ./targets/t06
+    container_name: t06-dnsmasq
+    networks:
+      lab_net:
+        ipv4_address: 172.28.0.106
+    depends_on:
+      authzone:
+        condition: service_healthy
+    healthcheck: *python-healthcheck
+
+  t07-nsd-auth:
+    build: ./targets/t07
+    container_name: t07-nsd-auth
+    networks:
+      lab_net:
+        ipv4_address: 172.28.0.107
+    healthcheck: *python-healthcheck
+
+  t08-knot-auth:
+    build: ./targets/t08
+    container_name: t08-knot-auth
+    networks:
+      lab_net:
+        ipv4_address: 172.28.0.108
+    healthcheck: *python-healthcheck
+
+  t09-pdns-auth:
+    build: ./targets/t09
+    container_name: t09-pdns-auth
+    networks:
+      lab_net:
+        ipv4_address: 172.28.0.109
+    healthcheck: *python-healthcheck
+
+  t10-pdns-recursor:
+    build: ./targets/t10
+    container_name: t10-pdns-recursor
+    networks:
+      lab_net:
+        ipv4_address: 172.28.0.110
+    depends_on:
+      authzone:
+        condition: service_healthy
+    healthcheck: *python-healthcheck
+
+  t11-forwarder-open:
+    build: ./targets/t11
+    container_name: t11-forwarder-open
+    networks:
+      lab_net:
+        ipv4_address: 172.28.0.111
+    depends_on:
+      t03-unbound-open:
+        condition: service_healthy
+    healthcheck: *python-healthcheck
+
+  t12-forwarder-closed:
+    build: ./targets/t12
+    container_name: t12-forwarder-closed
+    networks:
+      lab_net:
+        ipv4_address: 172.28.0.112
+    depends_on:
+      t04-unbound-refused:
+        condition: service_healthy
+    healthcheck: *python-healthcheck
+
+  t13-firewall-drop:
+    build: ./targets/t13
+    container_name: t13-firewall-drop
+    networks:
+      lab_net:
+        ipv4_address: 172.28.0.113
+
+  t14-servfail:
+    build: ./targets/t14
+    container_name: t14-servfail
+    networks:
+      lab_net:
+        ipv4_address: 172.28.0.114
+    healthcheck: *python-healthcheck
+
+  t15-rate-limited:
+    build: ./targets/t15
+    container_name: t15-rate-limited
+    networks:
+      lab_net:
+        ipv4_address: 172.28.0.115
+    depends_on:
+      authzone:
+        condition: service_healthy
+    healthcheck: *python-healthcheck
+
+  t16-tcp-truncate:
+    build: ./targets/t16
+    container_name: t16-tcp-truncate
+    networks:
+      lab_net:
+        ipv4_address: 172.28.0.116
+    depends_on:
+      authzone:
+        condition: service_healthy
+    healthcheck: *python-healthcheck
+
+  t17-lying-resolver:
+    build: ./targets/t17
+    container_name: t17-lying-resolver
+    networks:
+      lab_net:
+        ipv4_address: 172.28.0.117
+    healthcheck: *python-healthcheck
+
+  t18-high-latency:
+    build: ./targets/t18
+    container_name: t18-high-latency
+    networks:
+      lab_net:
+        ipv4_address: 172.28.0.118
+    depends_on:
+      authzone:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; s=socket.socket(socket.AF_INET,socket.SOCK_DGRAM); s.settimeout(5); s.sendto(b'\\x00\\x01\\x01\\x00\\x00\\x01\\x00\\x00\\x00\\x00\\x00\\x00\\x04test\\x00\\x00\\x01\\x00\\x01', ('127.0.0.1',53)); s.recvfrom(512); s.close()"]
+      interval: 10s
+      timeout: 8s
+      retries: 10
+      start_period: 5s
+
+  t19-packet-loss:
+    build: ./targets/t19
+    container_name: t19-packet-loss
+    networks:
+      lab_net:
+        ipv4_address: 172.28.0.119
+    depends_on:
+      authzone:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; s=socket.socket(socket.AF_INET,socket.SOCK_DGRAM); s.settimeout(2); s.sendto(b'\\x00\\x01\\x01\\x00\\x00\\x01\\x00\\x00\\x00\\x00\\x00\\x00\\x04test\\x00\\x00\\x01\\x00\\x01', ('127.0.0.1',53)); s.recvfrom(512); s.close()"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+      start_period: 5s
+
+  t20-auth-refuse:
+    build: ./targets/t20
+    container_name: t20-auth-refuse
+    networks:
+      lab_net:
+        ipv4_address: 172.28.0.120
+    healthcheck: *python-healthcheck

@@ -1,0 +1,88 @@
+authorisation:
+  owner: "Team Binary Beans lab"
+  authorised_by: "Prof (Dr) Rupayan Das"
+  authorised_on: "2026-10-16"
+  statement: "All listed servers are lab containers owned by the team."
+test_zone: "probe.lab.test"
+test_zone_ip: "172.28.0.10"
+targets:
+  - id: t01
+    name: bind-open
+    ip: 172.28.0.101
+    serves_zone: "owned.t01.lab.test"
+  - id: t02
+    name: bind-closed
+    ip: 172.28.0.102
+    serves_zone: "owned.t02.lab.test"
+  - id: t03
+    name: unbound-open
+    ip: 172.28.0.103
+    serves_zone: null
+  - id: t04
+    name: unbound-refused
+    ip: 172.28.0.104
+    serves_zone: null
+  - id: t05
+    name: kresd-open
+    ip: 172.28.0.105
+    serves_zone: null
+  - id: t06
+    name: dnsmasq-fwd
+    ip: 172.28.0.106
+    serves_zone: null
+  - id: t07
+    name: nsd-auth
+    ip: 172.28.0.107
+    serves_zone: "owned.t07.lab.test"
+  - id: t08
+    name: knot-auth
+    ip: 172.28.0.108
+    serves_zone: "owned.t08.lab.test"
+  - id: t09
+    name: pdns-auth
+    ip: 172.28.0.109
+    serves_zone: "owned.t09.lab.test"
+  - id: t10
+    name: pdns-recursor
+    ip: 172.28.0.110
+    serves_zone: null
+  - id: t11
+    name: forwarder-open
+    ip: 172.28.0.111
+    serves_zone: null
+  - id: t12
+    name: forwarder-closed
+    ip: 172.28.0.112
+    serves_zone: null
+  - id: t13
+    name: firewall-drop
+    ip: 172.28.0.113
+    serves_zone: null
+  - id: t14
+    name: servfail-server
+    ip: 172.28.0.114
+    serves_zone: null
+  - id: t15
+    name: rate-limited
+    ip: 172.28.0.115
+    serves_zone: null
+  - id: t16
+    name: tcp-truncate
+    ip: 172.28.0.116
+    serves_zone: null
+  - id: t17
+    name: lying-resolver
+    ip: 172.28.0.117
+    serves_zone: null
+  - id: t18
+    name: high-latency
+    ip: 172.28.0.118
+    serves_zone: null
+  - id: t19
+    name: packet-loss
+    ip: 172.28.0.119
+    serves_zone: null
+  - id: t20
+    name: auth-refuse-else
+    ip: 172.28.0.120
+    serves_zone: "owned.t20.lab.test"

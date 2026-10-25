@@ -1,0 +1,6 @@
+global_qps: 5
+per_target_qps: 1
+max_queries_per_target: 3
+timeout_seconds: 2.0
+max_total_queries: 80
+edns_payload: 1232

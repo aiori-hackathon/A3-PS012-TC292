@@ -1,0 +1,81 @@
+targets:
+  - id: t01
+    name: bind-open
+    expected_label: Recursive
+    setup: "BIND, recursion yes, allow-recursion any"
+  - id: t02
+    name: bind-closed
+    expected_label: Refused
+    setup: "BIND, allow-recursion limited to localhost"
+  - id: t03
+    name: unbound-open
+    expected_label: Recursive
+    setup: "Unbound, access-control allow all"
+  - id: t04
+    name: unbound-refused
+    expected_label: Refused
+    setup: "Unbound, access-control refuse for client range"
+  - id: t05
+    name: kresd-open
+    expected_label: Recursive
+    setup: "Knot Resolver, open"
+  - id: t06
+    name: dnsmasq-fwd
+    expected_label: Recursive
+    setup: "dnsmasq with upstream set to test-zone server"
+  - id: t07
+    name: nsd-auth
+    expected_label: Authoritative-only
+    setup: "NSD authoritative for its own zone"
+  - id: t08
+    name: knot-auth
+    expected_label: Authoritative-only
+    setup: "Knot DNS authoritative"
+  - id: t09
+    name: pdns-auth
+    expected_label: Authoritative-only
+    setup: "PowerDNS Authoritative"
+  - id: t10
+    name: pdns-recursor
+    expected_label: Recursive
+    setup: "PowerDNS Recursor, open"
+  - id: t11
+    name: forwarder-open
+    expected_label: Recursive
+    setup: "Forwarder to open upstream (nonce arrives from upstream IP)"
+  - id: t12
+    name: forwarder-closed
+    expected_label: Refused
+    setup: "Forwarder to closed upstream"
+  - id: t13
+    name: firewall-drop
+    expected_label: Inconclusive
+    setup: "Firewall drops all traffic from client"
+  - id: t14
+    name: servfail-server
+    expected_label: Inconclusive
+    setup: "Always answers SERVFAIL"
+  - id: t15
+    name: rate-limited
+    expected_label: Recursive
+    setup: "Rate-limited: answers first N queries then drops; Recursive if answered in time"
+  - id: t16
+    name: tcp-truncate
+    expected_label: Recursive
+    setup: "Truncates UDP, full answer over TCP, open recursion"
+  - id: t17
+    name: lying-resolver
+    expected_label: Inconclusive
+    setup: "Sets RA=1 and returns A record without contacting our zone"
+  - id: t18
+    name: high-latency
+    expected_label: Recursive
+    setup: "~1.5s delay but open recursion"
+  - id: t19
+    name: packet-loss
+    expected_label: Recursive
+    setup: "Random 30% packet loss, open recursion"
+  - id: t20
+    name: auth-refuse-else
+    expected_label: Authoritative-only
+    setup: "Authoritative for owned zone, refuses everything else"

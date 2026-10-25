@@ -1,0 +1,6 @@
+$TTL 3600
+@   IN  SOA ns.owned.t09.lab.test. admin.owned.t09.lab.test. (
+        2026101601 3600 900 604800 86400 )
+    IN  NS  ns.owned.t09.lab.test.
+ns  IN  A   172.28.0.109
+www IN  A   172.28.0.109
