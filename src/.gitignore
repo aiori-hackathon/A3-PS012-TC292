@@ -1,1 +1,7 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
 *.md
+!docs/
+!docs/**

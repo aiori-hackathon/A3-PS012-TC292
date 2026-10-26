@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dnsassess"
+version = "0.1.0"
+description = "Authorised DNS Resolver Exposure Assessment tool (AIORI-3 PS-012)"
+requires-python = ">=3.10"
+dependencies = [
+    "dnspython>=2.0.0,<3",
+    "PyYAML>=6.0",
+]
+
+[project.scripts]
+dnsassess = "dnsassess.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["src/tests"]
+addopts = ["-q"]
