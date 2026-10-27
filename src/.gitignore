@@ -3,5 +3,4 @@ __pycache__/
 .pytest_cache/
 
 *.md
-!docs/
-!docs/**
+docs/
