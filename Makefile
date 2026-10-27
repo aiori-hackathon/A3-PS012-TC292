@@ -1,12 +1,12 @@
 .PHONY: test lab-up lab-down lab-status lab-logs lab-run lab-ping demo scan compare report verify-rate
 
-PYTHON ?= python3
+UV ?= uv
 SRC := src
 LAB := $(SRC)/lab
 
-# Run unit tests (no Docker required). This is the Phase 2 verification target.
+# Run unit tests (no Docker required). Uses uv.
 test:
-	cd $(SRC) && $(PYTHON) -m pytest
+	cd $(SRC) && $(UV) run pytest
 
 # Start the Docker lab (20 targets + test-zone server + client container).
 lab-up:
@@ -35,13 +35,13 @@ lab-ping:
 demo: lab-up scan compare report
 
 scan:
-	cd $(SRC) && $(PYTHON) -m dnsassess.cli scan --scope config/scope.yaml --rate config/rate.yaml
+	cd $(SRC) && $(UV) run -m dnsassess.cli scan --scope config/scope.yaml --rate config/rate.yaml
 
 compare:
-	cd $(SRC) && $(PYTHON) -m dnsassess.cli compare
+	cd $(SRC) && $(UV) run -m dnsassess.cli compare
 
 report:
-	cd $(SRC) && $(PYTHON) -m dnsassess.cli report
+	cd $(SRC) && $(UV) run -m dnsassess.cli report
 
 verify-rate:
 	@echo "Packet-capture rate verification requires the Docker lab; see build prompt section 9."
