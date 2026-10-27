@@ -98,6 +98,7 @@ class Prober:
         qname: str,
         rdtype: dns.rdatatype.RdataType,
         rd: bool,
+        nonce: Optional[str] = None,
     ) -> ProbeResult:
         """Send one query: UDP first, TCP fallback only on TC."""
         qname_text = str(qname)
@@ -120,6 +121,7 @@ class Prober:
                 response_time_ms=(time.monotonic() - start) * 1000,
                 transport="udp",
                 error="timeout",
+                nonce=nonce,
             )
         except OSError as exc:
             return ProbeResult(
@@ -133,6 +135,7 @@ class Prober:
                 response_time_ms=(time.monotonic() - start) * 1000,
                 transport="udp",
                 error=str(exc),
+                nonce=nonce,
             )
 
         tc = bool(response.flags & dns.flags.TC)
@@ -154,6 +157,7 @@ class Prober:
                     response_time_ms=(time.monotonic() - start) * 1000,
                     transport="tcp",
                     error=str(exc),
+                    nonce=nonce,
                 )
 
         return ProbeResult(
@@ -166,6 +170,7 @@ class Prober:
             answer=[rr.to_text() for rr in response.answer],
             response_time_ms=(time.monotonic() - start) * 1000,
             transport=transport,
+            nonce=nonce,
         )
 
     # -- public probes -------------------------------------------------
@@ -173,7 +178,7 @@ class Prober:
         """Recursion probe: A query for <nonce>.test_zone, RD=1."""
         self.limiter.wait(target.id)
         qname = f"{nonce}.{self.scope.test_zone}"
-        return self._send(target, qname, dns.rdatatype.A, rd=True)
+        return self._send(target, qname, dns.rdatatype.A, rd=True, nonce=nonce)
 
     def probe_B(self, target: Target) -> ProbeResult:
         """Zone probe: SOA query for target's serves_zone, RD=0."""
@@ -189,6 +194,7 @@ class Prober:
                 response_time_ms=0.0,
                 transport="none",
                 error="no serves_zone configured",
+                nonce=None,
             )
         self.limiter.wait(target.id)
         return self._send(target, target.serves_zone, dns.rdatatype.SOA, rd=False)

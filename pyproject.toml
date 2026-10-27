@@ -19,6 +19,9 @@ dnsassess = "dnsassess.cli:main"
 [tool.pytest.ini_options]
 testpaths = ["src/tests"]
 addopts = ["-q"]
+markers = [
+    "lab: integration test requiring the Docker Compose lab",
+]
 
 [tool.uv]
 

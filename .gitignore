@@ -24,5 +24,7 @@ venv/
 
 # Project outputs
 out/
+src/out/
+src/lab/authzone/logs/
 KILL
 .pytest_cache/
