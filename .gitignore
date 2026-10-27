@@ -1,0 +1,26 @@
+# Documentation (kept locally, not tracked in git)
+src/docs/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.env
+.venv
+env/
+venv/
+.venv/
+
+# Editors / OS
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Project outputs
+out/
+KILL
+.pytest_cache/
