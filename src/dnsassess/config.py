@@ -1,8 +1,3 @@
-"""Load and validate scope.yaml and rate.yaml configuration.
-
-The authorisation block is treated as a hard gate: if it is missing or
-incomplete, loading fails loudly so the tool never runs unauthorised.
-"""
 from __future__ import annotations
 
 import hashlib

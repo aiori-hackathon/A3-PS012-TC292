@@ -1,9 +1,3 @@
-"""Token-bucket rate limiter with one global bucket and one bucket per target.
-
-``wait(target_id)`` blocks until both the global bucket and the target's bucket
-have a token, then consumes one from each. ``clock`` and ``sleep`` are
-injectable so the limiter can be driven by a fake clock in tests.
-"""
 from __future__ import annotations
 
 import time

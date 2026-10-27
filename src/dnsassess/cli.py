@@ -1,16 +1,3 @@
-"""Command-line interface: scan, compare, report, demo.
-
-scan: loads scope/rate config, runs SafetyGate, probes each authorised
-target, classifies via the nonce-based recursion proof, and writes
-evidence + results to out/.
-
-compare: compares predicted labels against lab/ground_truth.yaml to build
-a confusion matrix and error analysis (Phase 3-4).
-
-report: writes JSON, CSV and HTML reports (Phase 4).
-
-demo: lab-up -> scan -> compare -> report (Phase 5).
-"""
 from __future__ import annotations
 
 import argparse
@@ -22,7 +9,7 @@ from pathlib import Path
 import yaml
 
 from .classifier import classify
-from .comparator import compare, LABELS
+from .comparator import LAB_CAUSES, LABELS, compare
 from .config import ConfigError, load_rate, load_scope
 from .evidence import EvidenceStore
 from .prober import Prober
@@ -152,15 +139,20 @@ def _cmd_compare(args: argparse.Namespace) -> int:
     report = json.loads(results_path.read_text(encoding="utf-8"))
     predictions = report.get("predictions", {})
 
-    # Load ground truth.
+    # Load ground truth: try cwd-relative, out-dir, then package-relative.
     gt_path = Path("lab/ground_truth.yaml")
     if not gt_path.exists():
         gt_path = Path(args.out) / "ground_truth.yaml"
+    if not gt_path.exists():
+        gt_path = Path(__file__).resolve().parents[1] / "lab" / "ground_truth.yaml"
+    if not gt_path.exists():
+        print("ground_truth.yaml not found", file=sys.stderr)
+        return 1
     with gt_path.open("r", encoding="utf-8") as fh:
         gt_data = yaml.safe_load(fh) or {}
     ground_truth = {t["id"]: t["expected_label"] for t in gt_data.get("targets", [])}
 
-    comparison = compare(predictions, ground_truth)
+    comparison = compare(predictions, ground_truth, LAB_CAUSES)
     print(f"accuracy: {comparison.accuracy:.1%}  ({comparison.correct}/{comparison.total})")
     for label in LABELS:
         print(

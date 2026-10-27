@@ -1,4 +1,3 @@
-"""Nonce tests: unique, lowercase hex, reproducible from seed."""
 from dnsassess.config import Authorisation, RateConfig, ScopeConfig, Target
 from dnsassess.prober import Prober
 from dnsassess.ratelimit import RateLimiter

@@ -1,12 +1,3 @@
-"""DNS prober: nonce generation, UDP/TCP queries, result recording.
-
-Probe A: A query for <nonce>.test_zone with RD=1  (tests recursion).
-Probe B: SOA query for the target's serves_zone with RD=0  (tests authority).
-
-UDP is tried first; TCP is used only as a fallback when the UDP reply carries
-the TC (truncated) flag. Only A and SOA queries are ever sent, EDNS payload is
-capped at ``edns_payload``, and the real source address is used (no spoofing).
-"""
 from __future__ import annotations
 
 import hashlib

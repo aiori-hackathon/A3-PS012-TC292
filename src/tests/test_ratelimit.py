@@ -1,4 +1,3 @@
-"""Token bucket honours global and per-target rates with a fake clock."""
 from dnsassess.config import RateConfig
 from dnsassess.ratelimit import RateLimiter, TokenBucket
 

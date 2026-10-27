@@ -1,5 +1,3 @@
-"""SafetyGate: out-of-scope refusal, 21-target abort, missing authorisation,
-kill switch."""
 from pathlib import Path
 
 from dnsassess.config import Authorisation, RateConfig, ScopeConfig, Target

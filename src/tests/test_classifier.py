@@ -1,8 +1,3 @@
-"""Classifier tests: one fixture per rule branch (build prompt §6).
-
-Covers all 7 classification rules plus the forwarder (via_forwarder) case
-where the auth log's src_ip differs from the target IP.
-"""
 from dnsassess.classifier import classify
 from dnsassess.prober import ProbeResult
 

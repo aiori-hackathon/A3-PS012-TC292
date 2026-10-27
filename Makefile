@@ -8,9 +8,9 @@ LAB := $(SRC)/lab
 test:
 	cd $(SRC) && $(UV) run pytest
 
-# Start the Docker lab (20 targets + test-zone server + client container).
+# Start the Docker lab (20 targets + test-zone server + separate client).
 lab-up:
-	cd $(LAB) && docker compose up -d --build
+	cd $(LAB) && docker compose up -d --build --remove-orphans
 	@echo "Lab starting. Run 'make lab-status' to check health."
 
 lab-status:
@@ -22,7 +22,7 @@ lab-down:
 lab-logs:
 	cd $(LAB) && docker compose logs -f --tail=50
 
-# Run a command inside the lab client container (has network reach to all targets).
+# Run a command inside the separate lab client container.
 # Usage: make lab-run CMD="-m dnsassess.cli scan --scope config/scope.yaml --rate config/rate.yaml"
 lab-run:
 	cd $(LAB) && docker exec -t lab-client python3 $(CMD)

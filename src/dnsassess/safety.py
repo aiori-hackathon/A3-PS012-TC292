@@ -1,8 +1,3 @@
-"""SafetyGate: scope enforcement, max-20 limit, kill switch, authorisation gate.
-
-Every method raises :class:`SafetyError` instead of failing silently, so the
-tool stops before doing anything unsafe.
-"""
 from __future__ import annotations
 
 import signal

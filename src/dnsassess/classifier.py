@@ -1,10 +1,3 @@
-"""Classifier: label each target as Recursive, Authoritative-only, Refused,
-or Inconclusive using the nonce-based recursion proof (build prompt §6).
-
-Rules are applied in order; the first matching rule decides the label. The
-key idea is to *prove* recursion via the nonce appearing in our own
-auth-zone log, not to infer it from flags like RA.
-"""
 from __future__ import annotations
 
 from dataclasses import dataclass, field

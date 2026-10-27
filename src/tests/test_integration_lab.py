@@ -1,12 +1,3 @@
-"""Lab integration test: requires the Docker Compose lab to be running.
-
-Runs a full scan against the 20 lab targets from inside the authzone
-container (which has network reach to all targets), compares predicted
-labels against ground_truth.yaml, and asserts:
-
-- Overall accuracy >= 90%
-- Every mismatch has a documented root-cause cause
-"""
 from __future__ import annotations
 
 import json
@@ -17,23 +8,10 @@ from pathlib import Path
 import pytest
 import yaml
 
+from dnsassess.comparator import LAB_CAUSES as CAUSES
 from dnsassess.comparator import compare
 
 LABELS = ["Recursive", "Authoritative-only", "Refused", "Inconclusive"]
-
-CAUSES = {
-    "t02": (
-        "rule_gap",
-        "BIND restricted to localhost (recursive but closed to client) — "
-        "externally indistinguishable from authoritative-only: probe A REFUSED, "
-        "probe B AA=1",
-    ),
-    "t15": (
-        "rate_limit",
-        "Rate-limited server drops queries under load; timeout before response "
-        "arrives",
-    ),
-}
 
 
 def _lab_reachable() -> bool:
@@ -43,7 +21,7 @@ def _lab_reachable() -> bool:
             [
                 "docker",
                 "exec",
-                "authzone",
+                "lab-client",
                 "python3",
                 "-c",
                 "import socket; s=socket.socket(); s.settimeout(2); "
@@ -66,20 +44,20 @@ def test_lab_accuracy_at_least_90(tmp_path):
     out_dir = tmp_path / "out"
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    # Run the scan from inside the authzone container (lab network access).
+    # Run the scan from the dedicated client container.
     scan_cmd = [
         "docker",
         "exec",
-        "authzone",
+        "lab-client",
         "python3",
         "-c",
         (
             "import sys; sys.path.insert(0, '/app'); "
             "from dnsassess.cli import main; "
             f"sys.exit(main(['scan', '--scope', '/app/config/scope.yaml', "
-            f"--rate', '/app/config/rate.yaml', '--out', '/app/out', "
-            f"--seed', 'integration', "
-            f"--auth-log', '/var/log/authzone/queries.jsonl']))"
+            f"'--rate', '/app/config/rate.yaml', '--out', '/app/out', "
+            f"'--seed', 'integration', "
+            f"'--auth-log', '/var/log/authzone/queries.jsonl']))"
         ),
     ]
     result = subprocess.run(scan_cmd, capture_output=True, text=True, timeout=180)
@@ -90,7 +68,7 @@ def test_lab_accuracy_at_least_90(tmp_path):
     if not results_path.exists():
         # Fallback: copy from container
         subprocess.run(
-            ["docker", "cp", "authzone:/app/out/results.json", str(tmp_path / "results.json")],
+            ["docker", "cp", "lab-client:/app/out/results.json", str(tmp_path / "results.json")],
             check=True,
         )
         results_path = tmp_path / "results.json"
@@ -102,7 +80,7 @@ def test_lab_accuracy_at_least_90(tmp_path):
     gt_path = Path("/app/ground_truth.yaml")
     if not gt_path.exists():
         subprocess.run(
-            ["docker", "cp", "authzone:/app/ground_truth.yaml", str(tmp_path / "ground_truth.yaml")],
+            ["docker", "cp", "lab-client:/app/ground_truth.yaml", str(tmp_path / "ground_truth.yaml")],
             check=True,
         )
         gt_path = tmp_path / "ground_truth.yaml"

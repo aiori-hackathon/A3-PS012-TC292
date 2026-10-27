@@ -1,8 +1,3 @@
-"""Comparator: confusion matrix, per-class precision/recall, error analysis.
-
-Compares the tool's predicted labels against ``ground_truth.yaml``. Every
-mismatch is assigned a root-cause category so each miss is documented.
-"""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -100,3 +95,23 @@ def compare(
         result.recall[label] = tp / (tp + fn) if (tp + fn) else 0.0
 
     return result
+
+
+LAB_CAUSES = {
+    "t02": (
+        "rule_gap",
+        "Closed recursion ACL is externally indistinguishable from "
+        "authoritative-only with the available probes (probe A REFUSED, "
+        "probe B AA=1).",
+    ),
+    "t15": (
+        "rate_limit",
+        "The intentionally rate-limited target dropped queries before the "
+        "configured timeout elapsed.",
+    ),
+    "t19": (
+        "packet_loss",
+        "Simulated packet loss intermittently drops probe or response "
+        "packets, producing spurious timeouts for an otherwise open resolver.",
+    ),
+}

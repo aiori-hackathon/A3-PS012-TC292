@@ -59,14 +59,65 @@ def handle_query(data: bytes, addr: tuple, sock: socket.socket) -> None:
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr, flush=True)
 
-def main() -> None:
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+def handle_tcp_query(conn: socket.socket, addr: tuple) -> None:
+    """Read one DNS-over-TCP request and return its length-prefixed response."""
+    try:
+        header = conn.recv(2)
+        if len(header) != 2:
+            return
+        length = struct.unpack("!H", header)[0]
+        data = b""
+        while len(data) < length:
+            chunk = conn.recv(length - len(data))
+            if not chunk:
+                return
+            data += chunk
+
+        request = dns.message.from_wire(data)
+        if not request.question:
+            return
+        q = request.question[0]
+        if q.name == OWN_ZONE or q.name.is_subdomain(OWN_ZONE):
+            response = build_auth_response(request)
+        elif q.name.is_subdomain(PROBE_ZONE):
+            response = dns.query.udp(request, AUTHZONE_IP, timeout=2.0)
+        else:
+            response = dns.message.make_response(request)
+            response.flags |= dns.flags.RA
+            response.set_rcode(dns.rcode.NXDOMAIN)
+        wire = response.to_wire()
+        conn.sendall(struct.pack("!H", len(wire)) + wire)
+    except Exception as exc:
+        print(f"TCP error from {addr}: {exc}", file=sys.stderr, flush=True)
+    finally:
+        conn.close()
+
+
+def tcp_server() -> None:
+    """Serve DNS-over-TCP requests on port 53."""
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind(("0.0.0.0", 53))
+    sock.listen(32)
+    while True:
+        conn, addr = sock.accept()
+        threading.Thread(
+            target=handle_tcp_query, args=(conn, addr), daemon=True
+        ).start()
+
+
+def main() -> None:
+    udp_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    udp_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    udp_sock.bind(("0.0.0.0", 53))
+    threading.Thread(target=tcp_server, daemon=True).start()
     print("t01: BIND-like open recursive server ready", flush=True)
     while True:
-        data, addr = sock.recvfrom(4096)
-        threading.Thread(target=handle_query, args=(data, addr, sock), daemon=True).start()
+        data, addr = udp_sock.recvfrom(4096)
+        threading.Thread(
+            target=handle_query, args=(data, addr, udp_sock), daemon=True
+        ).start()
 
 if __name__ == "__main__":
     main()

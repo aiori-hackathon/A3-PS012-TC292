@@ -1,9 +1,3 @@
-"""EvidenceStore: append-only JSONL evidence log + auth-zone log reader.
-
-Appends one JSON line per probe to ``out/evidence.jsonl``. Also reads the
-test-zone server's query log (``queries.jsonl``) and indexes it by nonce so
-the classifier can check whether a nonce was seen -- the proof of recursion.
-"""
 from __future__ import annotations
 
 import json
