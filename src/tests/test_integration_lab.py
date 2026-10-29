@@ -91,6 +91,11 @@ def test_lab_accuracy_at_least_90(tmp_path):
 
     comparison = compare(predictions, ground_truth, CAUSES)
 
+    assert predictions.get("t02") == "Refused", (
+        f"closed resolver should refuse both probes; got "
+        f"{predictions.get('t02')!r}"
+    )
+
     # Assert accuracy >= 90%.
     assert comparison.accuracy >= 0.90, (
         f"Accuracy {comparison.accuracy:.1%} below 90% threshold "

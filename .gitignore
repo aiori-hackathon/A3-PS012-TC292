@@ -1,5 +1,6 @@
 # Documentation (kept locally, not tracked in git)
-src/docs/
+src/docs/*
+!src/docs/pseudocode.md
 
 # Python
 __pycache__/

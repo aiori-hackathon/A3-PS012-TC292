@@ -6,7 +6,7 @@ targets:
   - id: t02
     name: bind-closed
     expected_label: Refused
-    setup: "BIND, allow-recursion limited to localhost"
+    setup: "BIND, no hosted zones, allow-recursion limited to localhost"
   - id: t03
     name: unbound-open
     expected_label: Recursive
@@ -58,7 +58,7 @@ targets:
   - id: t15
     name: rate-limited
     expected_label: Recursive
-    setup: "Rate-limited: answers first N queries then drops; Recursive if answered in time"
+    setup: "Allows up to five queries per rolling five-second window; recursive if answered in time"
   - id: t16
     name: tcp-truncate
     expected_label: Recursive
@@ -74,7 +74,7 @@ targets:
   - id: t19
     name: packet-loss
     expected_label: Recursive
-    setup: "Random 30% packet loss, open recursion"
+    setup: "Deterministic 30% packet loss per query name, open recursion"
   - id: t20
     name: auth-refuse-else
     expected_label: Authoritative-only

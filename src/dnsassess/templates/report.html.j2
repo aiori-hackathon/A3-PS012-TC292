@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>DNSAssess Report</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2em; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ddd; padding: 8px; }
+    th { background: #f4f4f4; }
+    .rec { background: #d4edda; }
+    .inc { background: #f8d7da; }
+    .auth { background: #dbeafe; }
+    .refused { background: #fef3c7; }
+    .other { background: #e2e3e5; }
+  </style>
+</head>
+<body>
+  <h1>DNS Resolver Exposure Assessment Report</h1>
+  <p><strong>Tool version:</strong> {{ run_meta.tool_version }} | <strong>Seed:</strong> {{ run_meta.seed }} | <strong>Config hash:</strong> {{ run_meta.config_hash }}</p>
+  <p><strong>Start:</strong> {{ run_meta.start_time }} | <strong>End:</strong> {{ run_meta.end_time }}</p>
+
+  <h2>Summary</h2>
+  <ul>
+    <li>Recursive: {{ counts.get('Recursive', 0) }}</li>
+    <li>Authoritative-only: {{ counts.get('Authoritative-only', 0) }}</li>
+    <li>Refused: {{ counts.get('Refused', 0) }}</li>
+    <li>Inconclusive: {{ counts.get('Inconclusive', 0) }}</li>
+  </ul>
+
+  <h2>Per-target results</h2>
+  <table>
+    <tr><th>ID</th><th>Name</th><th>IP</th><th>Label</th><th>Reason</th><th>via_forwarder</th><th>latency_ms</th></tr>
+    {% for r in results %}
+    {% set lbl = r.label %}
+    <tr class="{% if lbl == 'Recursive' %}rec{% elif lbl == 'Authoritative-only' %}auth{% elif lbl == 'Refused' %}refused{% elif lbl == 'Inconclusive' %}inc{% else %}other{% endif %}">
+      <td>{{ r.target_id }}</td>
+      <td>{{ r.name }}</td>
+      <td>{{ r.ip }}</td>
+      <td>{{ lbl }}</td>
+      <td>{{ r.reason }}</td>
+      <td>{{ r.via_forwarder }}</td>
+      <td>{{ "%.2f"|format(r.probe_a.response_time_ms) if r.probe_a and r.probe_a.response_time_ms is not none else '' }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  {% if comparison %}
+  <h2>Confusion Matrix</h2>
+  <p>Accuracy: {{ "%.1f"|format(comparison.accuracy*100) }}% ({{ comparison.correct }}/{{ comparison.total }})</p>
+  <table>
+    <tr>
+      <th>Truth \ Predicted</th>
+      {% for label in comparison.confusion_matrix %}
+      <th>{{ label }}</th>
+      {% endfor %}
+    </tr>
+    {% for truth, row in comparison.confusion_matrix.items() %}
+    <tr>
+      <th>{{ truth }}</th>
+      {% for label in comparison.confusion_matrix %}
+      <td>{{ row.get(label, 0) }}</td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </table>
+  {% if comparison.mismatches %}
+  <h3>Error Analysis</h3>
+  <ul>
+    {% for m in comparison.mismatches %}
+    <li>{{ m.target_id }}: truth={{ m.truth }} predicted={{ m.predicted }} cause={{ m.cause }} - {{ m.explanation }}</li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p>No mismatches.</p>
+  {% endif %}
+  {% endif %}
+
+  <h2>Remediation</h2>
+  {% for r in results if r.label == 'Recursive' %}
+  <div style="border:1px solid #ccc; padding:1em; background:#fff3cd;">
+    <strong>{{ r.target_id }} ({{ r.name }}):</strong> Restrict recursion to intended clients with an access control list (RFC 5358 / BCP 140). Block outside access to recursive service.
+  </div>
+  {% else %}
+  <p>No Recursive targets were identified.</p>
+  {% endfor %}
+</body>
+</html>

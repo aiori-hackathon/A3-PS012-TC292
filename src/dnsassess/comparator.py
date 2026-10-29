@@ -98,16 +98,15 @@ def compare(
 
 
 LAB_CAUSES = {
-    "t02": (
-        "rule_gap",
-        "Closed recursion ACL is externally indistinguishable from "
-        "authoritative-only with the available probes (probe A REFUSED, "
-        "probe B AA=1).",
-    ),
     "t15": (
         "rate_limit",
         "The intentionally rate-limited target dropped queries before the "
         "configured timeout elapsed.",
+    ),
+    "t18": (
+        "timeout_too_short",
+        "The high-latency target adds a 1.5-second response delay; a timeout "
+        "can exceed the configured probe deadline when upstream resolution is slow.",
     ),
     "t19": (
         "packet_loss",

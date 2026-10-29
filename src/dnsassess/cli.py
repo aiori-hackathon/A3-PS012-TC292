@@ -4,6 +4,7 @@ import argparse
 import json
 import sys
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 import yaml
@@ -15,6 +16,7 @@ from .evidence import EvidenceStore
 from .prober import Prober
 from .ratelimit import RateLimiter
 from .safety import SafetyGate, SafetyError
+from .report import build_run_metadata, generate_reports
 
 
 DEFAULT_OUT = "out"
@@ -22,6 +24,7 @@ DEFAULT_AUTH_LOG = "lab/authzone/logs/queries.jsonl"
 
 
 def _cmd_scan(args: argparse.Namespace) -> int:
+    start_time = datetime.now(timezone.utc)
     try:
         scope = load_scope(args.scope)
         rate = load_rate(args.rate)
@@ -119,7 +122,15 @@ def _cmd_scan(args: argparse.Namespace) -> int:
 
     # Write results.json
     results_path = out_dir / "results.json"
+    run_metadata = build_run_metadata(
+        args.scope,
+        args.rate,
+        args.seed,
+        start_time,
+        datetime.now(timezone.utc),
+    )
     report = {
+        "run_metadata": run_metadata,
         "results": results,
         "predictions": predictions,
     }
@@ -130,6 +141,17 @@ def _cmd_scan(args: argparse.Namespace) -> int:
     return 0
 
 
+def _find_ground_truth(out_dir: Path) -> Path | None:
+    package_root = Path(__file__).resolve().parents[1]
+    candidates = (
+        Path("lab/ground_truth.yaml"),
+        out_dir / "ground_truth.yaml",
+        package_root / "ground_truth.yaml",
+        package_root / "lab" / "ground_truth.yaml",
+    )
+    return next((path for path in candidates if path.exists()), None)
+
+
 def _cmd_compare(args: argparse.Namespace) -> int:
     # Load predictions from previous scan output.
     results_path = Path(args.out) / "results.json"
@@ -137,15 +159,16 @@ def _cmd_compare(args: argparse.Namespace) -> int:
         print(f"no results found at {results_path}; run `scan` first.", file=sys.stderr)
         return 1
     report = json.loads(results_path.read_text(encoding="utf-8"))
-    predictions = report.get("predictions", {})
+    # results.json may now be full report from generate_reports
+    if "results" in report and "predictions" in report:
+        predictions = report.get("predictions", {})
+        results_data = report.get("results", [])
+    else:
+        predictions = report.get("predictions", {})
+        results_data = report.get("results", [])
 
-    # Load ground truth: try cwd-relative, out-dir, then package-relative.
-    gt_path = Path("lab/ground_truth.yaml")
-    if not gt_path.exists():
-        gt_path = Path(args.out) / "ground_truth.yaml"
-    if not gt_path.exists():
-        gt_path = Path(__file__).resolve().parents[1] / "lab" / "ground_truth.yaml"
-    if not gt_path.exists():
+    gt_path = _find_ground_truth(Path(args.out))
+    if gt_path is None:
         print("ground_truth.yaml not found", file=sys.stderr)
         return 1
     with gt_path.open("r", encoding="utf-8") as fh:
@@ -153,6 +176,17 @@ def _cmd_compare(args: argparse.Namespace) -> int:
     ground_truth = {t["id"]: t["expected_label"] for t in gt_data.get("targets", [])}
 
     comparison = compare(predictions, ground_truth, LAB_CAUSES)
+    labels = list(comparison.confusion_matrix)
+    column_width = max(18, *(len(label) for label in labels))
+    print("\nconfusion matrix (rows=truth, columns=predicted):")
+    print(f"{'truth / predicted':>{column_width}} " + " ".join(
+        f"{label:>{column_width}}" for label in labels
+    ))
+    for truth, row in comparison.confusion_matrix.items():
+        print(
+            f"{truth:>{column_width}} "
+            + " ".join(f"{row[label]:>{column_width}}" for label in labels)
+        )
     print(f"accuracy: {comparison.accuracy:.1%}  ({comparison.correct}/{comparison.total})")
     for label in LABELS:
         print(
@@ -172,13 +206,113 @@ def _cmd_compare(args: argparse.Namespace) -> int:
 
 
 def _cmd_report(args: argparse.Namespace) -> int:
-    print("report: not yet implemented (Phase 4).")
+    results_path = Path(args.out) / "results.json"
+    if not results_path.exists():
+        print(f"no results found at {results_path}; run `scan` first.", file=sys.stderr)
+        return 1
+    report = json.loads(results_path.read_text(encoding="utf-8"))
+    # if it's full report format, extract
+    if "run_metadata" in report and "results" in report:
+        results_report = {
+            "run_metadata": report["run_metadata"],
+            "results": report["results"],
+            "predictions": report["predictions"],
+        }
+    else:
+        results_report = report
+
+    # find paths for config hash
+    scope_path = Path(args.scope) if getattr(args, "scope", None) else Path("config/scope.yaml")
+    rate_path = Path(args.rate) if getattr(args, "rate", None) else Path("config/rate.yaml")
+    if not scope_path.exists():
+        scope_path = Path(__file__).resolve().parents[1] / "config" / "scope.yaml"
+    if not rate_path.exists():
+        rate_path = Path(__file__).resolve().parents[1] / "config" / "rate.yaml"
+
+    seed = report.get("run_metadata", {}).get("seed", getattr(args, "seed", "default"))
+
+    # Load the comparison when ground truth is available.
+    comparison = None
+    gt_path = _find_ground_truth(Path(args.out))
+    if gt_path is not None:
+        with gt_path.open("r", encoding="utf-8") as fh:
+            gt_data = yaml.safe_load(fh) or {}
+        ground_truth = {t["id"]: t["expected_label"] for t in gt_data.get("targets", [])}
+        predictions = results_report.get("predictions", {})
+        comparison = compare(predictions, ground_truth, LAB_CAUSES)
+    else:
+        print("ground_truth.yaml not found; generating reports without comparison.", file=sys.stderr)
+
+    paths = generate_reports(
+        args.out,
+        results_report,
+        scope_path=scope_path,
+        rate_path=rate_path,
+        seed=seed,
+        comparison=comparison,
+    )
+    print(f"reports written: {paths['results_json']}, {paths['results_csv']}, {paths['report_html']}")
+    if comparison is not None:
+        print(f"accuracy: {comparison.accuracy:.1%} ({comparison.correct}/{comparison.total})")
+    return 0
+
+
+def _cmd_verify_stability(args: argparse.Namespace) -> int:
+    if args.runs < 2:
+        print("stability verification requires at least two runs", file=sys.stderr)
+        return 2
+    out_dir = Path(args.out)
+    predictions: list[dict[str, str]] = []
+    for run_number in range(1, args.runs + 1):
+        run_out = out_dir / f"run{run_number}"
+        scan_args = argparse.Namespace(
+            scope=args.scope,
+            rate=args.rate,
+            out=str(run_out),
+            seed=args.seed,
+            auth_log=args.auth_log,
+        )
+        status = _cmd_scan(scan_args)
+        if status != 0:
+            return status
+        report_path = run_out / "results.json"
+        predictions.append(
+            json.loads(report_path.read_text(encoding="utf-8")).get("predictions", {})
+        )
+
+    target_ids = sorted(set().union(*(run.keys() for run in predictions)))
+    mismatches = [
+        target_id
+        for target_id in target_ids
+        if len({run.get(target_id) for run in predictions}) != 1
+    ]
+    if mismatches:
+        print(
+            f"label stability failed: {len(target_ids) - len(mismatches)}/"
+            f"{len(target_ids)} targets agree across {args.runs} runs",
+            file=sys.stderr,
+        )
+        for target_id in mismatches:
+            labels = ", ".join(str(run.get(target_id, "missing")) for run in predictions)
+            print(f"  {target_id}: {labels}", file=sys.stderr)
+        return 1
+
+    print(f"label stability passed: all {len(target_ids)} targets agree across {args.runs} runs")
     return 0
 
 
 def _cmd_demo(args: argparse.Namespace) -> int:
-    print("demo: not yet implemented (Phase 5).")
-    return 0
+    import subprocess
+
+    try:
+        result = subprocess.run(
+            [sys.executable, str(Path(__file__).resolve().parents[1] / "run_demo.py")],
+            check=False,
+        )
+    except OSError as exc:
+        print(f"demo could not start: {exc}", file=sys.stderr)
+        return 1
+    return result.returncode
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -205,7 +339,21 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_report = sub.add_parser("report", help="write JSON/CSV/HTML reports")
     p_report.add_argument("--out", default=DEFAULT_OUT, help="output directory")
+    p_report.add_argument("--scope", help="path to scope.yaml")
+    p_report.add_argument("--rate", help="path to rate.yaml")
+    p_report.add_argument("--seed", default="default")
     p_report.set_defaults(func=_cmd_report)
+
+    p_stability = sub.add_parser(
+        "verify-stability", help="repeat scans and require identical labels"
+    )
+    p_stability.add_argument("--scope", required=True, help="path to scope.yaml")
+    p_stability.add_argument("--rate", required=True, help="path to rate.yaml")
+    p_stability.add_argument("--out", default="out/stability", help="output directory")
+    p_stability.add_argument("--seed", default="stability")
+    p_stability.add_argument("--auth-log", default=DEFAULT_AUTH_LOG)
+    p_stability.add_argument("--runs", type=int, default=3)
+    p_stability.set_defaults(func=_cmd_verify_stability)
 
     sub.add_parser("demo", help="full lab-up -> scan -> compare -> report").set_defaults(
         func=_cmd_demo

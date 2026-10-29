@@ -57,10 +57,11 @@ def test_rate_limiter_global_and_per_target_buckets():
 
     limiter.wait("t01")  # both buckets have a token
     limiter.wait("t01")  # both empty → one refill sleep covers both
-    assert sleeps == [1.0]
+    assert len(sleeps) == 1
+    assert 1.009 <= sleeps[0] <= 1.011
 
 
-def test_per_target_buckets_are_independent():
+def test_per_target_buckets_are_independent_and_global_rate_is_enforced():
     clock = FakeClock(0.0)
     sleeps: list[float] = []
 
@@ -79,5 +80,6 @@ def test_per_target_buckets_are_independent():
     limiter = RateLimiter(rate=rate, clock=clock, sleep=fake_sleep)
 
     limiter.wait("t01")
-    limiter.wait("t02")  # separate per-target bucket, no sleep needed
-    assert sleeps == []
+    limiter.wait("t02")  # target permits are independent, global rate still applies
+    assert len(sleeps) == 1
+    assert 0.019 <= sleeps[0] <= 0.021

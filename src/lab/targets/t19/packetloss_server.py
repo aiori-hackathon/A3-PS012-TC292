@@ -1,5 +1,5 @@
 import socket
-import random
+import hashlib
 import threading
 import sys
 try:
@@ -15,14 +15,17 @@ AUTHZONE_IP = "172.28.0.10"
 DROP_RATE = 0.30
 
 def handle_query(data: bytes, addr: tuple, sock: socket.socket) -> None:
-    if random.random() < DROP_RATE:
-        return
     try:
         request = dns.message.from_wire(data)
         if request.question:
             q = request.question[0]
             probe_zone = dns.name.from_text("probe.lab.test.")
             if q.name.is_subdomain(probe_zone):
+                sample = int.from_bytes(
+                    hashlib.sha256(q.name.to_wire()).digest()[:8], "big"
+                ) / 2**64
+                if sample < DROP_RATE:
+                    return
                 response = dns.query.udp(request, AUTHZONE_IP, timeout=2.0)
                 sock.sendto(response.to_wire(), addr)
                 return

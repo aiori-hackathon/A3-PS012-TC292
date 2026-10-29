@@ -132,6 +132,7 @@ class Prober:
         tc = bool(response.flags & dns.flags.TC)
 
         if tc:
+            self.limiter.wait(target.id)
             start = time.monotonic()
             try:
                 response = dns.query.tcp(query, target.ip, port=53, timeout=self.timeout)

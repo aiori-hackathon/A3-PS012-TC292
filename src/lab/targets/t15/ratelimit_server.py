@@ -2,6 +2,8 @@ import socket
 import struct
 import threading
 import sys
+import time
+from collections import deque
 try:
     import dns.message
     import dns.query
@@ -16,17 +18,19 @@ except ImportError:
     sys.exit(1)
 
 MAX_QUERIES = 5
-query_count = 0
+WINDOW_SECONDS = 5.0
+query_times: deque[float] = deque()
 count_lock = threading.Lock()
 AUTHZONE_IP = "172.28.0.10"
 
 def handle_query(data: bytes, addr: tuple, sock: socket.socket) -> None:
-    global query_count
     with count_lock:
-        query_count += 1
-        current = query_count
-    if current > MAX_QUERIES:
-        return
+        now = time.monotonic()
+        while query_times and now - query_times[0] >= WINDOW_SECONDS:
+            query_times.popleft()
+        if len(query_times) >= MAX_QUERIES:
+            return
+        query_times.append(now)
     try:
         request = dns.message.from_wire(data)
         if request.question:
@@ -47,7 +51,11 @@ def main() -> None:
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     sock.bind(("0.0.0.0", 53))
-    print(f"t15: Rate-limited server ready (max {MAX_QUERIES} queries)", flush=True)
+    print(
+        f"t15: Rate-limited server ready ({MAX_QUERIES} queries per "
+        f"{WINDOW_SECONDS:g}s)",
+        flush=True,
+    )
     while True:
         data, addr = sock.recvfrom(4096)
         threading.Thread(target=handle_query, args=(data, addr, sock), daemon=True).start()
