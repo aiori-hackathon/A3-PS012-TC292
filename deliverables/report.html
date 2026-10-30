@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DNS Resolver Exposure Assessment. Report</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #ffffff;
+      --surface: #f7f8fa;
+      --line: #e3e6ec;
+      --line-strong: #c8cdd7;
+      --text: #1a1d23;
+      --muted: #5c6472;
+      --accent: #1f63c8;
+      --mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+      --sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans);
+           line-height: 1.55; font-size: 15px; margin: 0; }
+    main { max-width: 920px; margin: 0 auto; padding: 48px 24px 72px; }
+    h1 { font-size: 1.65rem; letter-spacing: -0.02em; margin: 0 0 18px; line-height: 1.2; }
+    h2 { font-size: 1.02rem; margin: 44px 0 14px; letter-spacing: 0.01em; }
+    p { margin: 0 0 12px; }
+    .meta { color: var(--muted); font-size: 0.9rem; }
+    .meta code { font-family: var(--mono); font-size: 0.84rem; background: var(--surface);
+                 border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px;
+                 word-break: break-all; }
+    .metarow { margin: 6px 0; }
+    .checkline { border: 1px solid var(--line); border-left: 3px solid var(--accent);
+                 background: var(--surface); border-radius: 10px; padding: 12px 16px;
+                 font-size: 0.92rem; margin: 22px 0 0; }
+    .checkline b { color: var(--text); }
+    .ok { color: #1a7f37; font-weight: 600; }
+
+    .statline { display: flex; flex-wrap: wrap; gap: 0; margin: 26px 0 0;
+                border-top: 1px solid var(--line-strong); border-bottom: 1px solid var(--line-strong); }
+    .stat { padding: 14px 26px 14px 0; margin-right: 26px; }
+    .stat + .stat { border-left: 1px solid var(--line); padding-left: 26px; }
+    .stat .n { font-family: var(--mono); font-size: 1.45rem; font-weight: 600; display: block; letter-spacing: -0.01em; }
+    .stat .l { color: var(--muted); font-size: 0.78rem; }
+
+    table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+    caption { text-align: left; color: var(--muted); font-size: 0.82rem; padding: 4px 0 10px; }
+    th { text-align: left; color: var(--muted); font-size: 0.74rem; font-weight: 600;
+         text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--line-strong);
+         padding: 8px 12px 8px 0; white-space: nowrap; }
+    td { border-bottom: 1px solid var(--line); padding: 9px 12px 9px 0; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    td.mono, .mono { font-family: var(--mono); font-size: 0.85rem; }
+    td.num, th.num { text-align: right; font-family: var(--mono); font-size: 0.85rem; }
+    .badge { display: inline-block; font-size: 0.74rem; font-weight: 600; padding: 2px 9px;
+             border-radius: 999px; border: 1px solid transparent; white-space: nowrap; }
+    .b-rec { background: #e7f4ec; color: #175a2f; border-color: #bfe3cc; }
+    .b-auth { background: #e8effb; color: #1f4e9e; border-color: #c6d8f5; }
+    .b-ref { background: #fbf2df; color: #7c5b12; border-color: #eedeb4; }
+    .b-inc { background: #eef0f3; color: #4a5260; border-color: #d5dae2; }
+    .reason { color: var(--muted); font-family: var(--mono); font-size: 0.8rem; }
+    .ipfwd { color: var(--muted); }
+    .remark { color: var(--accent); }
+    .true { color: #8a5b00; font-weight: 600; }
+    .false { color: var(--muted); }
+
+    .matrix td:first-child, .matrix th:first-child { font-size: 0.78rem; }
+    .correct { color: #175a2f; font-weight: 600; }
+    .zero { color: #b9bfc9; }
+
+    .note { border: 1px solid var(--line); border-left: 3px solid var(--accent);
+            background: var(--surface); border-radius: 10px; padding: 12px 16px;
+            font-size: 0.92rem; margin: 0 0 10px; }
+    .note b { font-family: var(--mono); font-size: 0.85rem; }
+    .empty { color: var(--muted); }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    @media print {
+      body { font-size: 12px; }
+      main { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+<main>
+  <h1>DNS Resolver Exposure Assessment Report</h1>
+  <p>Nonce-based classification of the authorised lab resolvers. Recursion is
+  proven against the team's own test-zone log, never inferred from the RA flag.</p>
+
+  <div class="metarow meta">Tool v0.1.0 &nbsp;&middot;&nbsp; seed
+  <code>final-A</code> &nbsp;&middot;&nbsp; run 2026-10-30T15:36:01.525732+00:00 to
+  2026-10-30T15:36:28.924637+00:00</div>
+  <div class="metarow meta">Config hash <code>3891c9df72f44df9ba9ac8bd837be403669f63b70de280f74020c7de89a4c747</code></div>
+  
+  
+  <p class="checkline">Canary self-check: <b class="ok">verified</b>.
+  Control query <code class="mono">selfcheck-bd0a61e4.probe.lab.test.</code> answered
+  NOERROR from <code class="mono">172.28.0.2</code>
+  (1.8 ms), matching the canary-log
+  <code class="mono">src_ip</code>.</p>
+  
+
+  <h2>Summary</h2>
+  <div class="statline">
+    <div class="stat"><span class="n">10</span><span class="l">Recursive</span></div>
+    <div class="stat"><span class="n">4</span><span class="l">Authoritative-only</span></div>
+    <div class="stat"><span class="n">3</span><span class="l">Refused</span></div>
+    <div class="stat"><span class="n">3</span><span class="l">Inconclusive</span></div>
+  </div>
+
+  <h2>Per-target results</h2>
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Name</th><th>IP</th><th>Label</th><th>Reason</th><th>Forwarded</th><th class="num">Latency ms</th></tr>
+    </thead>
+    <tbody>
+    
+      
+      <tr>
+        <td class="mono">t01</td>
+        <td>bind-open</td>
+        <td class="mono">172.28.0.101</td>
+        <td><span class="badge b-rec">Recursive</span></td>
+        <td class="reason">nonce_seen_in_auth_log</td>
+        <td class="mono"><span class="false">no</span></td>
+        <td class="num">2.80</td>
+      </tr>
+    
+      
+      <tr>
+        <td class="mono">t02</td>
+        <td>bind-closed</td>
+        <td class="mono">172.28.0.102</td>
+        <td><span class="badge b-ref">Refused</span></td>
+        <td class="reason">both_probes_refused</td>
+        <td class="mono"><span class="false">no</span></td>
+        <td class="num">1.71</td>
+      </tr>
+    
+      
+      <tr>
+        <td class="mono">t03</td>
+        <td>unbound-open</td>
+        <td class="mono">172.28.0.103</td>
+        <td><span class="badge b-rec">Recursive</span></td>
+        <td class="reason">nonce_seen_in_auth_log</td>
+        <td class="mono"><span class="false">no</span></td>
+        <td class="num">2.48</td>
+      </tr>
+    
+      
+      <tr>
+        <td class="mono">t04</td>
+        <td>unbound-refused</td>
+        <td class="mono">172.28.0.104</td>
+        <td><span class="badge b-ref">Refused</span></td>
+        <td class="reason">both_probes_refused</td>
+        <td class="mono"><span class="false">no</span></td>
+        <td class="num">1.24</td>
+      </tr>
+    
+      
+      <tr>
+        <td class="mono">t05</td>
+        <td>kresd-open</td>
+        <td class="mono">172.28.0.105</td>
+        <td><span class="badge b-rec">Recursive</span></td>
+        <td class="reason">nonce_seen_in_auth_log</td>
+        <td class="mono"><span class="false">no</span></td>
+        <td class="num">2.76</td>
+      </tr>
+    
+      
+      <tr>
+        <td class="mono">t06</td>
+        <td>dnsmasq-fwd</td>
+        <td class="mono">172.28.0.106</td>
+        <td><span class="badge b-rec">Recursive</span></td>
+        <td class="reason">nonce_seen_in_auth_log</td>
+        <td class="mono"><span class="false">no</span></td>
+        <td class="num">2.65</td>
+      </tr>
+    
+      
+      <tr>
+        <td class="mono">t07</td>
+        <td>nsd-auth</td>
+        <td class="mono">172.28.0.107</td>
+        <td><span class="badge b-auth">Authoritative-only</span></td>
+        <td class="reason">zone_answer_without_recursion</td>
+        <td class="mono"><span class="false">no</span></td>
+        <td class="num">1.15</td>
+      </tr>
+    
+      
+      <tr>
+        <td class="mono">t08</td>
+        <td>knot-auth</td>
+        <td class="mono">172.28.0.108</td>
+        <td><span class="badge b-auth">Authoritative-only</span></td>
+        <td class="reason">zone_answer_without_recursion</td>
+        <td class="mono"><span class="false">no</span></td>
+        <td class="num">1.06</td>
+      </tr>
+    
+      
+      <tr>
+        <td class="mono">t09</td>
+        <td>pdns-auth</td>
+        <td class="mono">172.28.0.109</td>
+        <td><span class="badge b-auth">Authoritative-only</span></td>
+        <td class="reason">zone_answer_without_recursion</td>
+        <td class="mono"><span class="false">no</span></td>
+        <td class="num">0.99</td>
+      </tr>
+    
+      
+      <tr>
+        <td class="mono">t10</td>
+        <td>pdns-recursor</td>
+        <td class="mono">172.28.0.110</td>
+        <td><span class="badge b-rec">Recursive</span></td>
+        <td class="reason">nonce_seen_in_auth_log</td>
+        <td class="mono"><span class="false">no</span></td>
+        <td class="num">2.42</td>
+      </tr>
+    
+      
+      <tr>
+        <td class="mono">t11</td>
+        <td>forwarder-open</td>
+        <td class="mono">172.28.0.111</td>
+        <td><span class="badge b-rec">Recursive</span></td>
+        <td class="reason">nonce_seen_in_auth_log</td>
+        <td class="mono"><span class="true">yes</span></td>
+        <td class="num">4.59</td>
+      </tr>
+    
+      
+      <tr>
+        <td class="mono">t12</td>
+        <td>forwarder-closed</td>
+        <td class="mono">172.28.0.112</td>
+        <td><span class="badge b-ref">Refused</span></td>
+        <td class="reason">both_probes_refused</td>
+        <td class="mono"><span class="false">no</span></td>
+        <td class="num">1.93</td>
+      </tr>
+    
+      
+      <tr>
+        <td class="mono">t13</td>
+        <td>firewall-drop</td>
+        <td class="mono">172.28.0.113</td>
+        <td><span class="badge b-inc">Inconclusive</span></td>
+        <td class="reason">timeout</td>
+        <td class="mono"><span class="false">no</span></td>
+        <td class="num">3002.40</td>
+      </tr>
+    
+      
+      <tr>
+        <td class="mono">t14</td>
+        <td>servfail-server</td>
+        <td class="mono">172.28.0.114</td>
+        <td><span class="badge b-inc">Inconclusive</span></td>
+        <td class="reason">servfail</td>
+        <td class="mono"><span class="false">no</span></td>
+        <td class="num">1.36</td>
+      </tr>
+    
+      
+      <tr>
+        <td class="mono">t15</td>
+        <td>rate-limited</td>
+        <td class="mono">172.28.0.115</td>
+        <td><span class="badge b-rec">Recursive</span></td>
+        <td class="reason">nonce_seen_in_auth_log</td>
+        <td class="mono"><span class="false">no</span></td>
+        <td class="num">4.09</td>
+      </tr>
+    
+      
+      <tr>
+        <td class="mono">t16</td>
+        <td>tcp-truncate</td>
+        <td class="mono">172.28.0.116</td>
+        <td><span class="badge b-rec">Recursive</span></td>
+        <td class="reason">nonce_seen_in_auth_log</td>
+        <td class="mono"><span class="false">no</span></td>
+        <td class="num">3.31</td>
+      </tr>
+    
+      
+      <tr>
+        <td class="mono">t17</td>
+        <td>lying-resolver</td>
+        <td class="mono">172.28.0.117</td>
+        <td><span class="badge b-inc">Inconclusive</span></td>
+        <td class="reason">answer_without_upstream_evidence</td>
+        <td class="mono"><span class="false">no</span></td>
+        <td class="num">1.29</td>
+      </tr>
+    
+      
+      <tr>
+        <td class="mono">t18</td>
+        <td>high-latency</td>
+        <td class="mono">172.28.0.118</td>
+        <td><span class="badge b-rec">Recursive</span></td>
+        <td class="reason">nonce_seen_in_auth_log</td>
+        <td class="mono"><span class="false">no</span></td>
+        <td class="num">1503.00</td>
+      </tr>
+    
+      
+      <tr>
+        <td class="mono">t19</td>
+        <td>packet-loss</td>
+        <td class="mono">172.28.0.119</td>
+        <td><span class="badge b-rec">Recursive</span></td>
+        <td class="reason">nonce_seen_in_auth_log</td>
+        <td class="mono"><span class="false">no</span></td>
+        <td class="num">2.70</td>
+      </tr>
+    
+      
+      <tr>
+        <td class="mono">t20</td>
+        <td>auth-refuse-else</td>
+        <td class="mono">172.28.0.120</td>
+        <td><span class="badge b-auth">Authoritative-only</span></td>
+        <td class="reason">zone_answer_without_recursion</td>
+        <td class="mono"><span class="false">no</span></td>
+        <td class="num">0.80</td>
+      </tr>
+    
+    </tbody>
+  </table>
+  <p class="meta" style="margin-top:10px">Latency is the final-attempt round-trip time of probe A.
+  Retries and rate-limiter waits are excluded from that timer.</p>
+
+  
+  <h2>Confusion matrix</h2>
+  <p class="meta">Accuracy 100.0%
+  (20/20). Rows are ground truth,
+  columns are predictions.</p>
+  <table class="matrix">
+    <thead>
+      <tr><th>Truth \ Predicted</th>
+      <th>Recursive</th><th>Authoritative-only</th><th>Refused</th><th>Inconclusive</th>
+      </tr>
+    </thead>
+    <tbody>
+    
+      <tr>
+        <th>Recursive</th>
+        
+          
+          <td class="num correct">10</td>
+        
+          
+          <td class="num zero">0</td>
+        
+          
+          <td class="num zero">0</td>
+        
+          
+          <td class="num zero">0</td>
+        
+      </tr>
+    
+      <tr>
+        <th>Authoritative-only</th>
+        
+          
+          <td class="num zero">0</td>
+        
+          
+          <td class="num correct">4</td>
+        
+          
+          <td class="num zero">0</td>
+        
+          
+          <td class="num zero">0</td>
+        
+      </tr>
+    
+      <tr>
+        <th>Refused</th>
+        
+          
+          <td class="num zero">0</td>
+        
+          
+          <td class="num zero">0</td>
+        
+          
+          <td class="num correct">3</td>
+        
+          
+          <td class="num zero">0</td>
+        
+      </tr>
+    
+      <tr>
+        <th>Inconclusive</th>
+        
+          
+          <td class="num zero">0</td>
+        
+          
+          <td class="num zero">0</td>
+        
+          
+          <td class="num zero">0</td>
+        
+          
+          <td class="num correct">3</td>
+        
+      </tr>
+    
+    </tbody>
+  </table>
+
+  
+  <p class="empty">No mismatches: every prediction agrees with the seeded lab ground truth.</p>
+  
+  
+
+  <h2>Remediation for Recursive targets</h2>
+  
+  <div class="note"><b>t01 (bind-open)</b>
+  <p style="margin:6px 0 0">Restrict recursion to intended clients with an access
+  control list (RFC 5358 / BCP 140). Block outside access to recursive service.</p></div>
+  
+  <div class="note"><b>t03 (unbound-open)</b>
+  <p style="margin:6px 0 0">Restrict recursion to intended clients with an access
+  control list (RFC 5358 / BCP 140). Block outside access to recursive service.</p></div>
+  
+  <div class="note"><b>t05 (kresd-open)</b>
+  <p style="margin:6px 0 0">Restrict recursion to intended clients with an access
+  control list (RFC 5358 / BCP 140). Block outside access to recursive service.</p></div>
+  
+  <div class="note"><b>t06 (dnsmasq-fwd)</b>
+  <p style="margin:6px 0 0">Restrict recursion to intended clients with an access
+  control list (RFC 5358 / BCP 140). Block outside access to recursive service.</p></div>
+  
+  <div class="note"><b>t10 (pdns-recursor)</b>
+  <p style="margin:6px 0 0">Restrict recursion to intended clients with an access
+  control list (RFC 5358 / BCP 140). Block outside access to recursive service.</p></div>
+  
+  <div class="note"><b>t11 (forwarder-open)</b>
+  <p style="margin:6px 0 0">Restrict recursion to intended clients with an access
+  control list (RFC 5358 / BCP 140). Block outside access to recursive service.</p></div>
+  
+  <div class="note"><b>t15 (rate-limited)</b>
+  <p style="margin:6px 0 0">Restrict recursion to intended clients with an access
+  control list (RFC 5358 / BCP 140). Block outside access to recursive service.</p></div>
+  
+  <div class="note"><b>t16 (tcp-truncate)</b>
+  <p style="margin:6px 0 0">Restrict recursion to intended clients with an access
+  control list (RFC 5358 / BCP 140). Block outside access to recursive service.</p></div>
+  
+  <div class="note"><b>t18 (high-latency)</b>
+  <p style="margin:6px 0 0">Restrict recursion to intended clients with an access
+  control list (RFC 5358 / BCP 140). Block outside access to recursive service.</p></div>
+  
+  <div class="note"><b>t19 (packet-loss)</b>
+  <p style="margin:6px 0 0">Restrict recursion to intended clients with an access
+  control list (RFC 5358 / BCP 140). Block outside access to recursive service.</p></div>
+  
+</main>
+</body>
+</html>

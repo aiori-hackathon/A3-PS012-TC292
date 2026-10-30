@@ -43,12 +43,14 @@ A3-PS012-TC292/
 ## Configuration Files
 `src/config/scope.yaml`: Authorised targets (max 20), test zone `probe.lab.test`, test-zone IP `172.28.0.10`
 
-`src/config/rate.yaml`: `global_qps: 5`, `per_target_qps: 1`, `max_queries_per_target: 3`, `timeout_seconds: 2.0`, `max_total_queries: 80`, `edns_payload: 1232`
+`src/config/rate.yaml`: `global_qps: 5`, `per_target_qps: 1`, `max_queries_per_target: 3`, `timeout_seconds: 2.0`, `max_total_queries: 80`, `edns_payload: 1232`, `udp_retries: 2`
 
 ## Safety Requirements (Critical)
 - Never probe outside `scope.yaml` — enforced by `SafetyGate.check_scope()`
 - Max 20 targets — enforced by `SafetyGate.enforce_max_20()`
 - Kill switch: create `./KILL` file or send `SIGINT` to stop cleanly
+- `max_total_queries` and `max_queries_per_target` budgets are enforced before
+  every single query; UDP timeout retries count toward both
 - Only `A` (RD=1) and `SOA` (RD=0) queries; EDNS ≤ 1232 bytes
 - Real source IP (no spoofing)
 - `authorisation` block in `scope.yaml` must be complete, or refuse to run
@@ -71,7 +73,7 @@ A3-PS012-TC292/
 - Python 3.11, simple readable code, small functions, plain dicts/dataclasses
 - Allowed libs: `dnspython`, `PyYAML`, `Jinja2`, `pytest`, `pandas` (optional)
 - Every module: docstring. Public functions: type hints.
-- Document decisions in `src/docs/decisions.md`
+- Document decisions in `src/docs/decisions.md` (ADR dir: `src/docs/decisions/`)
 - Architecture diagrams in `src/docs/architecture.md` (Mermaid)
 
 ## Package manager

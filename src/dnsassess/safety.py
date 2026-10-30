@@ -16,10 +16,12 @@ class SafetyGate:
     scope: ScopeConfig
     kill_file: Path = Path("KILL")
     max_total_queries: int | None = None
+    max_queries_per_target: int | None = None
 
     def __post_init__(self) -> None:
         self._signals_received = False
         self._queries_sent = 0
+        self._queries_per_target: dict[str, int] = {}
         self._old_handlers: dict[int, object] = {}
 
     def check_authorisation(self) -> None:
@@ -44,8 +46,22 @@ class SafetyGate:
                 f"IP {ip} is not in scope.yaml; refusing to probe"
             )
 
-    def record_query(self) -> None:
+    def record_query(self, target_id: str | None = None) -> None:
+        """Count one query toward the global and (optionally) per-target caps."""
         self._queries_sent += 1
+        if target_id is not None:
+            self._queries_per_target[target_id] = (
+                self._queries_per_target.get(target_id, 0) + 1
+            )
+
+    def per_target_exceeded(self, target_id: str) -> bool:
+        """True once target_id has used its configured query budget."""
+        if self.max_queries_per_target is None:
+            return False
+        return (
+            self._queries_per_target.get(target_id, 0)
+            >= self.max_queries_per_target
+        )
 
     def kill_switch(self) -> bool:
         """Return True when the run must stop cleanly.

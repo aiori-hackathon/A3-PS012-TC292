@@ -63,6 +63,7 @@ class RateConfig:
     timeout_seconds: float
     max_total_queries: int
     edns_payload: int
+    udp_retries: int = 2
 
 
 def _require(data: dict, key: str, path: str):
@@ -120,6 +121,10 @@ def load_rate(path: str | Path) -> RateConfig:
     with path.open("r", encoding="utf-8") as fh:
         data = yaml.safe_load(fh) or {}
 
+    udp_retries = int(data.get("udp_retries", 2))
+    if udp_retries < 0:
+        raise ConfigError(f"{path}: udp_retries must be >= 0, got {udp_retries}")
+
     return RateConfig(
         global_qps=float(_require(data, "global_qps", str(path))),
         per_target_qps=float(_require(data, "per_target_qps", str(path))),
@@ -129,6 +134,7 @@ def load_rate(path: str | Path) -> RateConfig:
         timeout_seconds=float(_require(data, "timeout_seconds", str(path))),
         max_total_queries=int(_require(data, "max_total_queries", str(path))),
         edns_payload=int(_require(data, "edns_payload", str(path))),
+        udp_retries=udp_retries,
     )
 
 

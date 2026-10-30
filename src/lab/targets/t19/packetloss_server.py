@@ -14,6 +14,20 @@ except ImportError:
 AUTHZONE_IP = "172.28.0.10"
 DROP_RATE = 0.30
 
+# Deterministic transient loss: the FIRST packet for a qname is dropped iff
+# hash(qname) falls under DROP_RATE; any later repeat of the same qname is
+# always forwarded, so a UDP retry recovers. Ground truth stays Recursive
+# for every seed once the scanner uses its configured udp_retries.
+_seen_qnames: set[bytes] = set()
+
+
+def _should_drop_first_attempt(qname_wire: bytes) -> bool:
+    sample = int.from_bytes(
+        hashlib.sha256(qname_wire).digest()[:8], "big"
+    ) / 2**64
+    return sample < DROP_RATE
+
+
 def handle_query(data: bytes, addr: tuple, sock: socket.socket) -> None:
     try:
         request = dns.message.from_wire(data)
@@ -21,11 +35,11 @@ def handle_query(data: bytes, addr: tuple, sock: socket.socket) -> None:
             q = request.question[0]
             probe_zone = dns.name.from_text("probe.lab.test.")
             if q.name.is_subdomain(probe_zone):
-                sample = int.from_bytes(
-                    hashlib.sha256(q.name.to_wire()).digest()[:8], "big"
-                ) / 2**64
-                if sample < DROP_RATE:
-                    return
+                qname_wire = q.name.to_wire()
+                if qname_wire not in _seen_qnames:
+                    _seen_qnames.add(qname_wire)
+                    if _should_drop_first_attempt(qname_wire):
+                        return
                 response = dns.query.udp(request, AUTHZONE_IP, timeout=2.0)
                 sock.sendto(response.to_wire(), addr)
                 return

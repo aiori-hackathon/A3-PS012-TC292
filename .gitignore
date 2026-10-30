@@ -29,3 +29,6 @@ src/out/
 src/lab/authzone/logs/
 KILL
 .pytest_cache/
+
+# Final deliverable bundle (published bundle committed for evaluator review)
+!deliverables/

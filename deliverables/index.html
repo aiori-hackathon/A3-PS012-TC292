@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A3-PS012-TC292. DNS Resolver Exposure Assessment</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+         margin: 0; background: #0b0d11; color: #e8ebf0; line-height: 1.55; }
+  main { max-width: 760px; margin: 0 auto; padding: 56px 24px 72px; }
+  h1 { font-size: 1.75rem; letter-spacing: -0.02em; line-height: 1.2; margin: 0 0 6px; }
+  .sub { color: #98a1b0; font-size: 0.9rem; margin: 0 0 30px; }
+  .lede { font-size: 1.02rem; color: #c8cdd7; max-width: 62ch; margin: 0 0 4px; }
+
+  .statline { display: flex; flex-wrap: wrap; margin: 34px 0 8px;
+              border-top: 1px solid #2a303c; border-bottom: 1px solid #2a303c; }
+  .stat { padding: 16px 24px 16px 0; margin-right: 24px; }
+  .stat + .stat { border-left: 1px solid #232936; padding-left: 24px; }
+  .stat .n { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+             font-size: 1.5rem; font-weight: 600; display: block; letter-spacing: -0.01em; }
+  .stat .l { color: #98a1b0; font-size: 0.78rem; }
+
+  h2 { font-size: 1.02rem; margin: 44px 0 6px; }
+  .row { display: flex; gap: 18px; padding: 14px 0; border-bottom: 1px solid #1d222c; }
+  .row:last-child { border-bottom: none; }
+  .row dt { flex: 0 0 208px; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+            font-size: 0.88rem; color: #9dc4f0; }
+  .row dd { margin: 0; font-size: 0.94rem; color: #c8cdd7; }
+  .row a { color: #9dc4f0; text-decoration: none; }
+  .row a:hover { text-decoration: underline; }
+  .jobs { color: #98a1b0; }
+
+  .run { margin: 26px 0 0; border: 1px solid #232936; border-radius: 10px;
+         background: #12151b; padding: 18px 20px; }
+  .run h3 { margin: 0 0 8px; font-size: 0.95rem; }
+  .run p { margin: 0 0 10px; font-size: 0.92rem; color: #c8cdd7; }
+  .run .cmd { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+              display: inline-block; background: #0b0d11; border: 1px solid #2a303c;
+              border-radius: 6px; padding: 7px 12px; font-size: 0.85rem; color: #e8ebf0; }
+
+  table { border-collapse: collapse; width: 100%; margin-top: 8px; font-size: 0.92rem; }
+  th { text-align: left; color: #98a1b0; font-size: 0.72rem; font-weight: 600;
+       text-transform: uppercase; letter-spacing: 0.08em;
+       border-bottom: 1px solid #2a303c; padding: 8px 12px 8px 0; }
+  td { border-bottom: 1px solid #1d222c; padding: 9px 12px 9px 0; }
+  th.num, td.num { text-align: right; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.85rem; }
+  td.mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.85rem; }
+  .correct { color: #7fd7a1; font-weight: 600; }
+  .zero { color: #4a5060; }
+  .emarks { color: #98a1b0; font-size: 0.92rem; margin-top: 16px; }
+  .emarks strong { color: #e8ebf0; }
+  .note { color: #98a1b0; font-size: 0.9rem; margin-top: 30px; }
+  .note strong { color: #c8cdd7; }
+  code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Authorised DNS Resolver Exposure Assessment</h1>
+  <p class="sub">Team Binary Beans, AIORI-3, A3-PS012-TC292. CLI tool v0.1.0, seed final-A.</p>
+
+  <p class="lede">Nonce-based classification of 20 authorised lab DNS servers into
+  <strong>Recursive, Authoritative-only, Refused, Inconclusive</strong>. Recursion is
+  <em>proven</em> against the team's own authoritative test-zone log (a unique nonce
+  per target), never inferred from the RA flag, which any server may falsely claim.</p>
+
+  <div class="statline">
+    <div class="stat"><span class="n">20/20</span><span class="l">ground-truth agreement</span></div>
+    <div class="stat"><span class="n">100%</span><span class="l">accuracy, precision, recall</span></div>
+    <div class="stat"><span class="n">4</span><span class="l">seeds, each scoring 20/20</span></div>
+    <div class="stat"><span class="n">5/1 qps</span><span class="l">verified caps, global/target</span></div>
+  </div>
+
+  <h2>Evidence files</h2>
+  <dl>
+    <div class="row"><dt><a href="terminal-replay.html">terminal-replay.html</a></dt>
+      <dd>Watch the recorded runs: the full demo (self-check, scan, compare,
+      reports), the rate-verification capture, and the kill switch stopping a
+      scan cleanly. Plays in the browser, no setup.</dd></div>
+    <div class="row"><dt><a href="report.html">report.html</a></dt>
+      <dd>Full generated report: per-target results with reasons and latency,
+      confusion matrix, canary self-check, remediation for Recursive targets.</dd></div>
+    <div class="row"><dt><a href="results.json">results.json</a>&nbsp;
+      <a href="results.csv">results.csv</a> &nbsp;
+      <a href="evidence.jsonl">evidence.jsonl</a></dt>
+      <dd>Machine-readable outputs. The evidence log holds every probe: qname,
+      flags, rcode, attempts, nonce, and the self-check control record.</dd></div>
+    <div class="row"><dt><a href="stability-summary.json">stability-summary.json</a></dt>
+      <dd>Three same-seed runs plus one different-seed run: identical labels on
+      all 20 targets, probe attempts per run, self-check verified in each.</dd></div>
+    <div class="row"><dt><a href="rate-verification.json">rate-verification.json</a></dt>
+      <dd>Captured traffic vs the configured caps: global at or under 5 qps,
+      per-target at or under 1 qps, at most 3 queries per target. 30 DNS
+      questions (29 probes + 1 control query).</dd></div>
+  </dl>
+
+  <div class="run">
+    <h3>Run it yourself (manual setup)</h3>
+    <p>Two prerequisites: Docker (the 22-container lab needs a Docker daemon:
+    20 targets, the test-zone canary, and the separate client)
+    and <code>uv</code>.</p>
+    <p><span class="cmd">make lab-up</span>&ensp;<span class="cmd">make demo</span></p>
+    <p class="jobs">Builds the lab inside your Docker runtime, scans all 20
+    authorised targets from the dedicated client container, prints the
+    confusion matrix, and writes JSON, CSV, and HTML reports. Without Make:
+    <code>uv run --directory src python run_demo.py</code>.</p>
+  </div>
+
+  <h2>Confusion matrix (ground truth vs predicted)</h2>
+  <table>
+    <tr><th>Truth \ Predicted</th><th class="num">Recursive</th><th class="num">Auth-only</th><th class="num">Refused</th><th class="num">Inconcl.</th></tr>
+    <tr><td>Recursive</td><td class="num correct">10</td><td class="num zero">0</td><td class="num zero">0</td><td class="num zero">0</td></tr>
+    <tr><td>Authoritative-only</td><td class="num zero">0</td><td class="num correct">4</td><td class="num zero">0</td><td class="num zero">0</td></tr>
+    <tr><td>Refused</td><td class="num zero">0</td><td class="num zero">0</td><td class="num correct">3</td><td class="num zero">0</td></tr>
+    <tr><td>Inconclusive</td><td class="num zero">0</td><td class="num zero">0</td><td class="num zero">0</td><td class="num correct">3</td></tr>
+  </table>
+  <p class="emarks"><strong>Notable:</strong> the lying resolver (RA=1, fake answer,
+  never recursed) is correctly <em>not</em> labelled Recursive: its nonce never
+  reached the test-zone log (grep count 0). The silent firewall and the
+  packet-loss target are covered in the repo README's repeat-run table.</p>
+
+  <p class="note"><strong>About the lab:</strong> the 20 target containers are
+  Python emulations reproducing the query behaviour of common DNS software
+  (open and closed resolvers, authoritative-only, forwarder, packet dropper,
+  truncation, rate limiter, liar). They are not official BIND, Unbound, NSD,
+  Knot, or PowerDNS images; validating against real upstream images is future
+  work.<br>
+  <strong>Control:</strong> every scan opens with a canary attribution self-check.
+  One control query must reach the canary log attributed to the client's own
+  src IP, otherwise the scan refuses to run (see
+  <code>run_metadata.canary_selfcheck</code>). The refused fixtures double as
+  negative controls.<br>
+  Results establish agreement with this seeded lab, not accuracy on arbitrary
+  production servers. See the README Limitations.</p>
+</main>
+</body>
+</html>

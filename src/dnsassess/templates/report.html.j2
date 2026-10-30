@@ -2,87 +2,178 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>DNSAssess Report</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DNS Resolver Exposure Assessment. Report</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 2em; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #ddd; padding: 8px; }
-    th { background: #f4f4f4; }
-    .rec { background: #d4edda; }
-    .inc { background: #f8d7da; }
-    .auth { background: #dbeafe; }
-    .refused { background: #fef3c7; }
-    .other { background: #e2e3e5; }
+    :root {
+      color-scheme: light;
+      --bg: #ffffff;
+      --surface: #f7f8fa;
+      --line: #e3e6ec;
+      --line-strong: #c8cdd7;
+      --text: #1a1d23;
+      --muted: #5c6472;
+      --accent: #1f63c8;
+      --mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+      --sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans);
+           line-height: 1.55; font-size: 15px; margin: 0; }
+    main { max-width: 920px; margin: 0 auto; padding: 48px 24px 72px; }
+    h1 { font-size: 1.65rem; letter-spacing: -0.02em; margin: 0 0 18px; line-height: 1.2; }
+    h2 { font-size: 1.02rem; margin: 44px 0 14px; letter-spacing: 0.01em; }
+    p { margin: 0 0 12px; }
+    .meta { color: var(--muted); font-size: 0.9rem; }
+    .meta code { font-family: var(--mono); font-size: 0.84rem; background: var(--surface);
+                 border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px;
+                 word-break: break-all; }
+    .metarow { margin: 6px 0; }
+    .checkline { border: 1px solid var(--line); border-left: 3px solid var(--accent);
+                 background: var(--surface); border-radius: 10px; padding: 12px 16px;
+                 font-size: 0.92rem; margin: 22px 0 0; }
+    .checkline b { color: var(--text); }
+    .ok { color: #1a7f37; font-weight: 600; }
+
+    .statline { display: flex; flex-wrap: wrap; gap: 0; margin: 26px 0 0;
+                border-top: 1px solid var(--line-strong); border-bottom: 1px solid var(--line-strong); }
+    .stat { padding: 14px 26px 14px 0; margin-right: 26px; }
+    .stat + .stat { border-left: 1px solid var(--line); padding-left: 26px; }
+    .stat .n { font-family: var(--mono); font-size: 1.45rem; font-weight: 600; display: block; letter-spacing: -0.01em; }
+    .stat .l { color: var(--muted); font-size: 0.78rem; }
+
+    table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+    caption { text-align: left; color: var(--muted); font-size: 0.82rem; padding: 4px 0 10px; }
+    th { text-align: left; color: var(--muted); font-size: 0.74rem; font-weight: 600;
+         text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--line-strong);
+         padding: 8px 12px 8px 0; white-space: nowrap; }
+    td { border-bottom: 1px solid var(--line); padding: 9px 12px 9px 0; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    td.mono, .mono { font-family: var(--mono); font-size: 0.85rem; }
+    td.num, th.num { text-align: right; font-family: var(--mono); font-size: 0.85rem; }
+    .badge { display: inline-block; font-size: 0.74rem; font-weight: 600; padding: 2px 9px;
+             border-radius: 999px; border: 1px solid transparent; white-space: nowrap; }
+    .b-rec { background: #e7f4ec; color: #175a2f; border-color: #bfe3cc; }
+    .b-auth { background: #e8effb; color: #1f4e9e; border-color: #c6d8f5; }
+    .b-ref { background: #fbf2df; color: #7c5b12; border-color: #eedeb4; }
+    .b-inc { background: #eef0f3; color: #4a5260; border-color: #d5dae2; }
+    .reason { color: var(--muted); font-family: var(--mono); font-size: 0.8rem; }
+    .ipfwd { color: var(--muted); }
+    .remark { color: var(--accent); }
+    .true { color: #8a5b00; font-weight: 600; }
+    .false { color: var(--muted); }
+
+    .matrix td:first-child, .matrix th:first-child { font-size: 0.78rem; }
+    .correct { color: #175a2f; font-weight: 600; }
+    .zero { color: #b9bfc9; }
+
+    .note { border: 1px solid var(--line); border-left: 3px solid var(--accent);
+            background: var(--surface); border-radius: 10px; padding: 12px 16px;
+            font-size: 0.92rem; margin: 0 0 10px; }
+    .note b { font-family: var(--mono); font-size: 0.85rem; }
+    .empty { color: var(--muted); }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    @media print {
+      body { font-size: 12px; }
+      main { padding: 16px; }
+    }
   </style>
 </head>
 <body>
+<main>
   <h1>DNS Resolver Exposure Assessment Report</h1>
-  <p><strong>Tool version:</strong> {{ run_meta.tool_version }} | <strong>Seed:</strong> {{ run_meta.seed }} | <strong>Config hash:</strong> {{ run_meta.config_hash }}</p>
-  <p><strong>Start:</strong> {{ run_meta.start_time }} | <strong>End:</strong> {{ run_meta.end_time }}</p>
+  <p>Nonce-based classification of the authorised lab resolvers. Recursion is
+  proven against the team's own test-zone log, never inferred from the RA flag.</p>
+
+  <div class="metarow meta">Tool v{{ run_meta.tool_version }} &nbsp;&middot;&nbsp; seed
+  <code>{{ run_meta.seed }}</code> &nbsp;&middot;&nbsp; run {{ run_meta.start_time }} to
+  {{ run_meta.end_time }}</div>
+  <div class="metarow meta">Config hash <code>{{ run_meta.config_hash }}</code></div>
+  {% set chk = run_meta.get('canary_selfcheck') %}
+  {% if chk %}
+  <p class="checkline">Canary self-check: <b class="ok">{{ chk.status }}</b>.
+  Control query <code class="mono">{{ chk.control_qname }}</code> answered
+  {{ chk.rcode }} from <code class="mono">{{ chk.client_ip }}</code>
+  ({{ "%.1f"|format(chk.response_time_ms) }} ms), matching the canary-log
+  <code class="mono">src_ip</code>.</p>
+  {% endif %}
 
   <h2>Summary</h2>
-  <ul>
-    <li>Recursive: {{ counts.get('Recursive', 0) }}</li>
-    <li>Authoritative-only: {{ counts.get('Authoritative-only', 0) }}</li>
-    <li>Refused: {{ counts.get('Refused', 0) }}</li>
-    <li>Inconclusive: {{ counts.get('Inconclusive', 0) }}</li>
-  </ul>
+  <div class="statline">
+    <div class="stat"><span class="n">{{ counts.get('Recursive', 0) }}</span><span class="l">Recursive</span></div>
+    <div class="stat"><span class="n">{{ counts.get('Authoritative-only', 0) }}</span><span class="l">Authoritative-only</span></div>
+    <div class="stat"><span class="n">{{ counts.get('Refused', 0) }}</span><span class="l">Refused</span></div>
+    <div class="stat"><span class="n">{{ counts.get('Inconclusive', 0) }}</span><span class="l">Inconclusive</span></div>
+  </div>
 
   <h2>Per-target results</h2>
   <table>
-    <tr><th>ID</th><th>Name</th><th>IP</th><th>Label</th><th>Reason</th><th>via_forwarder</th><th>latency_ms</th></tr>
+    <thead>
+      <tr><th>ID</th><th>Name</th><th>IP</th><th>Label</th><th>Reason</th><th>Forwarded</th><th class="num">Latency ms</th></tr>
+    </thead>
+    <tbody>
     {% for r in results %}
-    {% set lbl = r.label %}
-    <tr class="{% if lbl == 'Recursive' %}rec{% elif lbl == 'Authoritative-only' %}auth{% elif lbl == 'Refused' %}refused{% elif lbl == 'Inconclusive' %}inc{% else %}other{% endif %}">
-      <td>{{ r.target_id }}</td>
-      <td>{{ r.name }}</td>
-      <td>{{ r.ip }}</td>
-      <td>{{ lbl }}</td>
-      <td>{{ r.reason }}</td>
-      <td>{{ r.via_forwarder }}</td>
-      <td>{{ "%.2f"|format(r.probe_a.response_time_ms) if r.probe_a and r.probe_a.response_time_ms is not none else '' }}</td>
-    </tr>
+      {% set lbl = r.label %}
+      <tr>
+        <td class="mono">{{ r.target_id }}</td>
+        <td>{{ r.name }}</td>
+        <td class="mono">{{ r.ip }}</td>
+        <td><span class="badge {% if lbl == 'Recursive' %}b-rec{% elif lbl == 'Authoritative-only' %}b-auth{% elif lbl == 'Refused' %}b-ref{% elif lbl == 'Inconclusive' %}b-inc{% else %}b-inc{% endif %}">{{ lbl }}</span></td>
+        <td class="reason">{{ r.reason }}</td>
+        <td class="mono"><span class="{{ 'true' if r.via_forwarder else 'false' }}">{{ 'yes' if r.via_forwarder else 'no' }}</span></td>
+        <td class="num">{{ "%.2f"|format(r.probe_a.response_time_ms) if r.probe_a and r.probe_a.response_time_ms is not none else '' }}</td>
+      </tr>
     {% endfor %}
+    </tbody>
   </table>
+  <p class="meta" style="margin-top:10px">Latency is the final-attempt round-trip time of probe A.
+  Retries and rate-limiter waits are excluded from that timer.</p>
 
   {% if comparison %}
-  <h2>Confusion Matrix</h2>
-  <p>Accuracy: {{ "%.1f"|format(comparison.accuracy*100) }}% ({{ comparison.correct }}/{{ comparison.total }})</p>
-  <table>
-    <tr>
-      <th>Truth \ Predicted</th>
-      {% for label in comparison.confusion_matrix %}
-      <th>{{ label }}</th>
-      {% endfor %}
-    </tr>
+  <h2>Confusion matrix</h2>
+  <p class="meta">Accuracy {{ "%.1f"|format(comparison.accuracy*100) }}%
+  ({{ comparison.correct }}/{{ comparison.total }}). Rows are ground truth,
+  columns are predictions.</p>
+  <table class="matrix">
+    <thead>
+      <tr><th>Truth \ Predicted</th>
+      {% for label in comparison.confusion_matrix %}<th>{{ label }}</th>{% endfor %}
+      </tr>
+    </thead>
+    <tbody>
     {% for truth, row in comparison.confusion_matrix.items() %}
-    <tr>
-      <th>{{ truth }}</th>
-      {% for label in comparison.confusion_matrix %}
-      <td>{{ row.get(label, 0) }}</td>
-      {% endfor %}
-    </tr>
+      <tr>
+        <th>{{ truth }}</th>
+        {% for label in comparison.confusion_matrix %}
+          {% set val = row.get(label, 0) %}
+          <td class="num {{ 'correct' if truth == label and val else ('zero' if not val else '') }}">{{ val }}</td>
+        {% endfor %}
+      </tr>
     {% endfor %}
+    </tbody>
   </table>
+
   {% if comparison.mismatches %}
-  <h3>Error Analysis</h3>
+  <h2>Error analysis</h2>
   <ul>
     {% for m in comparison.mismatches %}
-    <li>{{ m.target_id }}: truth={{ m.truth }} predicted={{ m.predicted }} cause={{ m.cause }} - {{ m.explanation }}</li>
+    <li class="mono"><b>{{ m.target_id }}</b>: truth={{ m.truth }} predicted={{ m.predicted }} cause={{ m.cause }}. {{ m.explanation }}</li>
     {% endfor %}
   </ul>
   {% else %}
-  <p>No mismatches.</p>
+  <p class="empty">No mismatches: every prediction agrees with the seeded lab ground truth.</p>
   {% endif %}
   {% endif %}
 
-  <h2>Remediation</h2>
+  <h2>Remediation for Recursive targets</h2>
   {% for r in results if r.label == 'Recursive' %}
-  <div style="border:1px solid #ccc; padding:1em; background:#fff3cd;">
-    <strong>{{ r.target_id }} ({{ r.name }}):</strong> Restrict recursion to intended clients with an access control list (RFC 5358 / BCP 140). Block outside access to recursive service.
-  </div>
+  <div class="note"><b>{{ r.target_id }} ({{ r.name }})</b>
+  <p style="margin:6px 0 0">Restrict recursion to intended clients with an access
+  control list (RFC 5358 / BCP 140). Block outside access to recursive service.</p></div>
   {% else %}
-  <p>No Recursive targets were identified.</p>
+  <p class="empty">No Recursive targets were identified.</p>
   {% endfor %}
+</main>
 </body>
 </html>

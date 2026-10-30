@@ -164,34 +164,6 @@ def test_rule6_auth_only_nxdomain_no_nonce():
 
 
 # ------------------------------------------------------------------
-# Rule 6c: Probe B AA=1 + Probe A REFUSED/no answer/NXDOMAIN without nonce
-# -> Authoritative-only
-# ------------------------------------------------------------------
-def test_rule6_auth_only_probe_a_refused():
-    a = _probe_a(rcode="REFUSED", answer=[], flags={"QR": True, "AA": False, "TC": False, "RD": True, "RA": False})
-    b = _probe_b(
-        rcode="NOERROR",
-        answer=["owned.t01.lab.test. 0 IN SOA ns.owned.t01.lab.test. ... 3600 ..."],
-        flags={"QR": True, "AA": True, "TC": False, "RD": False, "RA": False},
-    )
-    result = classify(a, b, [], "172.28.0.101")
-    assert result.label == "Authoritative-only"
-    assert result.reason == "zone_answer_without_recursion"
-
-
-def test_rule6_auth_only_nxdomain_no_nonce():
-    a = _probe_a(rcode="NXDOMAIN", answer=[], nonce="nonce")
-    b = _probe_b(
-        rcode="NOERROR",
-        answer=["owned.t01.lab.test. 0 IN SOA ..."],
-        flags={"QR": True, "AA": True, "TC": False, "RD": False, "RA": False},
-    )
-    result = classify(a, b, [], "172.28.0.101")
-    assert result.label == "Authoritative-only"
-    assert result.reason == "zone_answer_without_recursion"
-
-
-# ------------------------------------------------------------------
 # Rule 7: Else -> Inconclusive (conflicting_evidence)
 # ------------------------------------------------------------------
 def test_rule7_conflicting_evidence():

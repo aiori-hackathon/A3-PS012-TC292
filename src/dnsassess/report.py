@@ -26,7 +26,11 @@ try:
     from importlib import metadata
     __version__ = metadata.version("dnsassess")
 except Exception:
-    __version__ = "0.0.0"
+    try:
+        from . import __version__ as _package_version
+        __version__ = _package_version
+    except Exception:
+        __version__ = "0.0.0"
 
 
 def build_run_metadata(
@@ -74,7 +78,9 @@ def generate_reports(
         run_meta = build_run_metadata(scope_path, rate_path, seed, now, now)
     else:
         run_meta.setdefault("seed", seed)
-        run_meta.setdefault("tool_version", __version__)
+        # The report generator always stamps the running tool's version so
+        # a re-run of `report` cannot inherit a stale or fallback value.
+        run_meta["tool_version"] = __version__
         run_meta.setdefault("scope_path", str(scope_path) if scope_path else None)
         run_meta.setdefault("rate_path", str(rate_path) if rate_path else None)
 

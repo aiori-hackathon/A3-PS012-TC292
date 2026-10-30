@@ -85,3 +85,35 @@ def test_kill_switch_file(tmp_path: Path):
     assert not gate.kill_switch()
     kill_file.write_text("stop")
     assert gate.kill_switch()
+
+
+def test_per_target_query_cap_trips_and_isolates_targets():
+    gate = SafetyGate(
+        scope=_scope([]),
+        kill_file=Path("/nonexistent/KILL"),
+        max_queries_per_target=2,
+    )
+    gate.record_query("t01")
+    assert not gate.per_target_exceeded("t01")
+    gate.record_query("t01")
+    assert gate.per_target_exceeded("t01")
+    assert not gate.per_target_exceeded("t02"), "cap must be per target"
+
+
+def test_per_target_cap_disabled_when_unset():
+    gate = SafetyGate(scope=_scope([]), kill_file=Path("/nonexistent/KILL"))
+    for _ in range(5):
+        gate.record_query("t01")
+    assert not gate.per_target_exceeded("t01")
+
+
+def test_max_total_queries_trips_kill_switch():
+    gate = SafetyGate(
+        scope=_scope([]),
+        kill_file=Path("/nonexistent/KILL"),
+        max_total_queries=2,
+    )
+    gate.record_query("t01")
+    assert not gate.kill_switch()
+    gate.record_query("t02")
+    assert gate.kill_switch(), "total query budget must stop the run"

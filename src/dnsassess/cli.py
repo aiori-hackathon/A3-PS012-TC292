@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -16,11 +15,38 @@ from .evidence import EvidenceStore
 from .prober import Prober
 from .ratelimit import RateLimiter
 from .safety import SafetyGate, SafetyError
+from .selfcheck import SelfCheckResult, run_canary_selfcheck
 from .report import build_run_metadata, generate_reports
 
 
 DEFAULT_OUT = "out"
 DEFAULT_AUTH_LOG = "lab/authzone/logs/queries.jsonl"
+
+
+def _guarded_probe(
+    gate: SafetyGate,
+    store: EvidenceStore,
+    target_id: str,
+    make_skipped,  # (reason: str) -> ProbeResult
+    send,  # () -> ProbeResult
+):
+    """Send one probe under the safety gates, or record it as skipped.
+
+    The kill-switch and per-target caps are checked before every query, so
+    a probe is only ever sent inside its remaining budget.
+    """
+    if gate.kill_switch():
+        reason = "kill switch triggered"
+    elif gate.per_target_exceeded(target_id):
+        reason = "per-target query cap reached"
+    else:
+        gate.record_query(target_id)
+        result = send()
+        store.append(result)
+        return result
+    result = make_skipped(reason)
+    store.append(result)
+    return result
 
 
 def _cmd_scan(args: argparse.Namespace) -> int:
@@ -32,7 +58,11 @@ def _cmd_scan(args: argparse.Namespace) -> int:
         print(f"config error: {exc}", file=sys.stderr)
         return 1
 
-    gate = SafetyGate(scope=scope)
+    gate = SafetyGate(
+        scope=scope,
+        max_total_queries=rate.max_total_queries,
+        max_queries_per_target=rate.max_queries_per_target,
+    )
     try:
         gate.check_authorisation()
         gate.enforce_max_20(scope.targets)
@@ -44,13 +74,40 @@ def _cmd_scan(args: argparse.Namespace) -> int:
     prober = Prober(scope=scope, rate=rate, limiter=limiter)
     store = EvidenceStore(Path(args.out) / "evidence.jsonl")
 
-    # Read the auth-zone log to index nonces (proof of recursion).
-    auth_index: dict[str, list[dict]] = {}
-    if Path(args.auth_log).exists():
-        auth_index = EvidenceStore().read_auth_log(args.auth_log)
-
     out_dir = Path(args.out)
     out_dir.mkdir(parents=True, exist_ok=True)
+
+    # Phase 0: canary attribution self-check — one control query to our own
+    # canary server proves it receives, logs, and that the log reader can
+    # attribute entries to this client. The scan refuses to run otherwise.
+    # The control query counts toward the global query budget.
+    gate.record_query()
+    check: SelfCheckResult | None = None
+    if args.skip_selfcheck:
+        print("canary self-check skipped (--skip-selfcheck)", file=sys.stderr)
+    else:
+        check = run_canary_selfcheck(
+            zone_ip=scope.test_zone_ip,
+            zone=scope.test_zone,
+            seed=args.seed,
+            timeout=rate.timeout_seconds,
+            log_wait=args.log_wait,
+            limiter=limiter,
+            read_log=lambda: store.read_auth_log(args.auth_log),
+        )
+        store.append_raw({"record": "canary_selfcheck", **check.as_dict()})
+        if check.status != "verified":
+            print(
+                f"canary self-check {check.status}: {check.error or ''}; "
+                "refusing to scan — nonce/log correlation is not trustworthy.",
+                file=sys.stderr,
+            )
+            return 1
+        print(
+            f"canary self-check {check.status}: {check.control_qname} "
+            f"attributed to src_ip {check.observed_src_ip} "
+            f"({check.response_time_ms:.1f} ms)"
+        )
 
     # Phase 1: probe every target (probe_A + probe_B), storing raw results.
     probe_results: list[dict] = []
@@ -62,15 +119,22 @@ def _cmd_scan(args: argparse.Namespace) -> int:
             print(f"safety error: {exc}", file=sys.stderr)
             return 1
 
-        # Kill switch checked before every query.
-        gate.record_query()
-        if gate.kill_switch():
-            print("kill switch triggered; stopping cleanly.", file=sys.stderr)
-            break
-
         nonce = prober.next_nonce(args.seed, target.id)
-        probe_a = prober.probe_A(target, args.seed, nonce)
-        probe_b = prober.probe_B(target)
+
+        probe_a = _guarded_probe(
+            gate,
+            store,
+            target.id,
+            lambda reason, t=target, n=nonce: prober.skipped(t, "A", reason, nonce=n),
+            lambda t=target, n=nonce: prober.probe_A(t, args.seed, n),
+        )
+        probe_b = _guarded_probe(
+            gate,
+            store,
+            target.id,
+            lambda reason, t=target: prober.skipped(t, "B", reason),
+            lambda t=target: prober.probe_B(t),
+        )
 
         probe_results.append(
             {
@@ -80,15 +144,23 @@ def _cmd_scan(args: argparse.Namespace) -> int:
                 "probe_b": probe_b,
             }
         )
-        store.append(probe_a)
-        store.append(probe_b)
+        if gate.kill_switch():
+            print("kill switch triggered; stopping cleanly.", file=sys.stderr)
+            break
 
-    # Phase 2: read the auth-zone log (after probing, so recursive queries
-    # have arrived). Wait briefly for upstream resolvers to forward queries.
-    time.sleep(2.0)
-    auth_index: dict[str, list[dict]] = {}
-    if Path(args.auth_log).exists():
-        auth_index = EvidenceStore().read_auth_log(args.auth_log)
+    # Phase 2: read the auth-zone log so recursive queries have arrived.
+    # Poll until every answer that could prove recursion has a log entry,
+    # instead of a fixed sleep that races against slow resolvers.
+    expected_nonces = {
+        pr["nonce"]
+        for pr in probe_results
+        if pr["probe_a"].nonce
+        and pr["probe_a"].error is None
+        and pr["probe_a"].transport in ("udp", "tcp")
+    }
+    auth_index = store.wait_for_nonces(
+        args.auth_log, expected_nonces, timeout_seconds=args.log_wait
+    )
 
     # Phase 3: classify each target using probe results + auth log.
     predictions: dict[str, str] = {}
@@ -134,6 +206,8 @@ def _cmd_scan(args: argparse.Namespace) -> int:
         "results": results,
         "predictions": predictions,
     }
+    if check is not None:
+        run_metadata["canary_selfcheck"] = check.as_dict()
     results_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(f"scan complete: {len(results)} targets -> {results_path}")
     for r in results:
@@ -159,13 +233,7 @@ def _cmd_compare(args: argparse.Namespace) -> int:
         print(f"no results found at {results_path}; run `scan` first.", file=sys.stderr)
         return 1
     report = json.loads(results_path.read_text(encoding="utf-8"))
-    # results.json may now be full report from generate_reports
-    if "results" in report and "predictions" in report:
-        predictions = report.get("predictions", {})
-        results_data = report.get("results", [])
-    else:
-        predictions = report.get("predictions", {})
-        results_data = report.get("results", [])
+    predictions = report.get("predictions", {})
 
     gt_path = _find_ground_truth(Path(args.out))
     if gt_path is None:
@@ -211,15 +279,11 @@ def _cmd_report(args: argparse.Namespace) -> int:
         print(f"no results found at {results_path}; run `scan` first.", file=sys.stderr)
         return 1
     report = json.loads(results_path.read_text(encoding="utf-8"))
-    # if it's full report format, extract
-    if "run_metadata" in report and "results" in report:
-        results_report = {
-            "run_metadata": report["run_metadata"],
-            "results": report["results"],
-            "predictions": report["predictions"],
-        }
-    else:
-        results_report = report
+    results_report = {
+        "run_metadata": report.get("run_metadata", {}),
+        "results": report.get("results", []),
+        "predictions": report.get("predictions", {}),
+    }
 
     # find paths for config hash
     scope_path = Path(args.scope) if getattr(args, "scope", None) else Path("config/scope.yaml")
@@ -330,6 +394,17 @@ def build_parser() -> argparse.ArgumentParser:
         "--auth-log",
         default=DEFAULT_AUTH_LOG,
         help="path to auth-zone queries.jsonl",
+    )
+    p_scan.add_argument(
+        "--log-wait",
+        type=float,
+        default=6.0,
+        help="seconds to poll the auth-zone log for nonce evidence",
+    )
+    p_scan.add_argument(
+        "--skip-selfcheck",
+        action="store_true",
+        help="skip the canary attribution self-check (not recommended)",
     )
     p_scan.set_defaults(func=_cmd_scan)
 

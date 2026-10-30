@@ -186,4 +186,5 @@ def _summary(result: ProbeResult) -> dict:
         "transport": result.transport,
         "error": result.error,
         "response_time_ms": result.response_time_ms,
+        "attempts": result.attempts,
     }

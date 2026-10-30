@@ -4,3 +4,7 @@ max_queries_per_target: 3
 timeout_seconds: 3.0
 max_total_queries: 80
 edns_payload: 1232
+# Retry a timed-out UDP query up to this many extra times (same qname and
+# nonce, so the auth-zone log still correlates). Each retry waits on the
+# rate limiter and counts toward the per-target and total query caps.
+udp_retries: 2

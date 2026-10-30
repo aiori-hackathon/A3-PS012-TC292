@@ -74,7 +74,7 @@ targets:
   - id: t19
     name: packet-loss
     expected_label: Recursive
-    setup: "Deterministic 30% packet loss per query name, open recursion"
+    setup: "Drops the first packet per query name deterministically (30% band); retries of the same name are forwarded, open recursion"
   - id: t20
     name: auth-refuse-else
     expected_label: Authoritative-only

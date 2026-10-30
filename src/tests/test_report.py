@@ -77,11 +77,12 @@ def test_reports_include_metadata_and_target_data(tmp_path):
     assert "test-seed" in html
     assert metadata["config_hash"] in html
     assert start.isoformat() in html and end.isoformat() in html
-    assert "Confusion Matrix" in html
+    assert "Confusion matrix" in html
     assert "t01 (resolver)" in html
-    assert 'class="auth"' in html
-    assert 'class="refused"' in html
-    assert 'class="inc"' in html
+    assert 'class="badge b-rec"' in html
+    assert 'class="badge b-auth"' in html
+    assert 'class="badge b-ref"' in html
+    assert 'class="badge b-inc"' in html
     assert "8.91" in html
     assert "8.9148960000216" not in html
 
