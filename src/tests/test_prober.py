@@ -231,3 +231,23 @@ def test_no_serves_zone_returns_skipped_documented():
     assert skipped.transport == "none"
     assert skipped.attempts == 0
     assert "serves_zone" in (skipped.error or "")
+
+
+def test_rd_bit_is_honoured_per_probe(monkeypatch):
+    """Probe A is sent with RD=1 and probe B (zone SOA probe) with RD=0."""
+    prober, _ = _prober()
+    sent = []
+
+    def fake_udp(query, ip, port=53, timeout=None):
+        sent.append(query)
+        return _response_for(query)
+
+    monkeypatch.setattr("dns.query.udp", fake_udp)
+    target = Target(
+        id="t07", name="nsd-auth", ip="172.28.0.107", serves_zone="owned.t07.lab.test"
+    )
+    prober.probe_A(target, "seed", "abc123abc123")
+    prober.probe_B(target)
+
+    assert bool(sent[0].flags & dns.flags.RD) is True
+    assert bool(sent[1].flags & dns.flags.RD) is False

@@ -29,7 +29,7 @@ services:
     cap_add:
       - NET_RAW
     volumes:
-      - ../dnsassess:/app/dnsassess:ro
+      - ../dnsassess:/app/dnsassess:rw
       - ../config:/app/config:ro
       - ./ground_truth.yaml:/app/ground_truth.yaml:ro
       - ./authzone/logs:/var/log/authzone:ro

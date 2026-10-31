@@ -1,0 +1,845 @@
+{
+  "run_metadata": {
+    "tool_version": "0.1.0",
+    "seed": "phase4-stability",
+    "config_hash": "bb91b9bdf02d70d73dbc0b0f499dd14367cabf2703b223b6250bb06f170abad7",
+    "scope_path": "/app/config/scope.yaml",
+    "rate_path": "/app/config/rate.yaml",
+    "start_time": "2026-10-31T05:38:35.653723+00:00",
+    "end_time": "2026-10-31T05:39:02.992425+00:00"
+  },
+  "results": [
+    {
+      "target_id": "t01",
+      "name": "bind-open",
+      "ip": "172.28.0.101",
+      "serves_zone": "owned.t01.lab.test",
+      "label": "Recursive",
+      "reason": "nonce_seen_in_auth_log",
+      "via_forwarder": false,
+      "nonce_seen": true,
+      "evidence_ids": [
+        "t01:ba448589c5bc:A"
+      ],
+      "probe_a": {
+        "qname": "ba448589c5bc.probe.lab.test",
+        "qtype": "A",
+        "rcode": "NOERROR",
+        "flags": {
+          "QR": true,
+          "AA": false,
+          "TC": false,
+          "RD": true,
+          "RA": true
+        },
+        "transport": "udp",
+        "error": null,
+        "response_time_ms": 5.178446999991593,
+        "attempts": 1
+      },
+      "probe_b": {
+        "qname": "owned.t01.lab.test",
+        "qtype": "SOA",
+        "rcode": "NOERROR",
+        "flags": {
+          "QR": true,
+          "AA": true,
+          "TC": false,
+          "RD": false,
+          "RA": false
+        },
+        "transport": "udp",
+        "error": null,
+        "response_time_ms": 1.5841950000208271,
+        "attempts": 1
+      }
+    },
+    {
+      "target_id": "t02",
+      "name": "bind-closed",
+      "ip": "172.28.0.102",
+      "serves_zone": "owned.t02.lab.test",
+      "label": "Refused",
+      "reason": "both_probes_refused",
+      "via_forwarder": false,
+      "nonce_seen": false,
+      "evidence_ids": [
+        "t02:37fdb5a6f37c:A"
+      ],
+      "probe_a": {
+        "qname": "37fdb5a6f37c.probe.lab.test",
+        "qtype": "A",
+        "rcode": "REFUSED",
+        "flags": {
+          "QR": true,
+          "AA": false,
+          "TC": false,
+          "RD": true,
+          "RA": false
+        },
+        "transport": "udp",
+        "error": null,
+        "response_time_ms": 1.8112329999553367,
+        "attempts": 1
+      },
+      "probe_b": {
+        "qname": "owned.t02.lab.test",
+        "qtype": "SOA",
+        "rcode": "REFUSED",
+        "flags": {
+          "QR": true,
+          "AA": false,
+          "TC": false,
+          "RD": false,
+          "RA": false
+        },
+        "transport": "udp",
+        "error": null,
+        "response_time_ms": 1.237160999949083,
+        "attempts": 1
+      }
+    },
+    {
+      "target_id": "t03",
+      "name": "unbound-open",
+      "ip": "172.28.0.103",
+      "serves_zone": null,
+      "label": "Recursive",
+      "reason": "nonce_seen_in_auth_log",
+      "via_forwarder": false,
+      "nonce_seen": true,
+      "evidence_ids": [
+        "t03:8d03270cc4a1:A"
+      ],
+      "probe_a": {
+        "qname": "8d03270cc4a1.probe.lab.test",
+        "qtype": "A",
+        "rcode": "NOERROR",
+        "flags": {
+          "QR": true,
+          "AA": false,
+          "TC": false,
+          "RD": true,
+          "RA": true
+        },
+        "transport": "udp",
+        "error": null,
+        "response_time_ms": 20.791658000007374,
+        "attempts": 1
+      },
+      "probe_b": {
+        "qname": "",
+        "qtype": "SOA",
+        "rcode": "skipped",
+        "flags": {},
+        "transport": "none",
+        "error": "no serves_zone configured",
+        "response_time_ms": 0.0,
+        "attempts": 0
+      }
+    },
+    {
+      "target_id": "t04",
+      "name": "unbound-refused",
+      "ip": "172.28.0.104",
+      "serves_zone": null,
+      "label": "Refused",
+      "reason": "both_probes_refused",
+      "via_forwarder": false,
+      "nonce_seen": false,
+      "evidence_ids": [
+        "t04:e519b28ca5f7:A"
+      ],
+      "probe_a": {
+        "qname": "e519b28ca5f7.probe.lab.test",
+        "qtype": "A",
+        "rcode": "REFUSED",
+        "flags": {
+          "QR": true,
+          "AA": false,
+          "TC": false,
+          "RD": true,
+          "RA": false
+        },
+        "transport": "udp",
+        "error": null,
+        "response_time_ms": 1.0397379999744771,
+        "attempts": 1
+      },
+      "probe_b": {
+        "qname": "",
+        "qtype": "SOA",
+        "rcode": "skipped",
+        "flags": {},
+        "transport": "none",
+        "error": "no serves_zone configured",
+        "response_time_ms": 0.0,
+        "attempts": 0
+      }
+    },
+    {
+      "target_id": "t05",
+      "name": "kresd-open",
+      "ip": "172.28.0.105",
+      "serves_zone": null,
+      "label": "Recursive",
+      "reason": "nonce_seen_in_auth_log",
+      "via_forwarder": false,
+      "nonce_seen": true,
+      "evidence_ids": [
+        "t05:2e83ccfc11ea:A"
+      ],
+      "probe_a": {
+        "qname": "2e83ccfc11ea.probe.lab.test",
+        "qtype": "A",
+        "rcode": "NOERROR",
+        "flags": {
+          "QR": true,
+          "AA": false,
+          "TC": false,
+          "RD": true,
+          "RA": true
+        },
+        "transport": "udp",
+        "error": null,
+        "response_time_ms": 6.990646000019751,
+        "attempts": 1
+      },
+      "probe_b": {
+        "qname": "",
+        "qtype": "SOA",
+        "rcode": "skipped",
+        "flags": {},
+        "transport": "none",
+        "error": "no serves_zone configured",
+        "response_time_ms": 0.0,
+        "attempts": 0
+      }
+    },
+    {
+      "target_id": "t06",
+      "name": "dnsmasq-fwd",
+      "ip": "172.28.0.106",
+      "serves_zone": null,
+      "label": "Recursive",
+      "reason": "nonce_seen_in_auth_log",
+      "via_forwarder": false,
+      "nonce_seen": true,
+      "evidence_ids": [
+        "t06:294f32e4aeea:A"
+      ],
+      "probe_a": {
+        "qname": "294f32e4aeea.probe.lab.test",
+        "qtype": "A",
+        "rcode": "NOERROR",
+        "flags": {
+          "QR": true,
+          "AA": false,
+          "TC": false,
+          "RD": true,
+          "RA": true
+        },
+        "transport": "udp",
+        "error": null,
+        "response_time_ms": 5.84952499997371,
+        "attempts": 1
+      },
+      "probe_b": {
+        "qname": "",
+        "qtype": "SOA",
+        "rcode": "skipped",
+        "flags": {},
+        "transport": "none",
+        "error": "no serves_zone configured",
+        "response_time_ms": 0.0,
+        "attempts": 0
+      }
+    },
+    {
+      "target_id": "t07",
+      "name": "nsd-auth",
+      "ip": "172.28.0.107",
+      "serves_zone": "owned.t07.lab.test",
+      "label": "Authoritative-only",
+      "reason": "zone_answer_without_recursion",
+      "via_forwarder": false,
+      "nonce_seen": false,
+      "evidence_ids": [
+        "t07:5df5d8834526:A"
+      ],
+      "probe_a": {
+        "qname": "5df5d8834526.probe.lab.test",
+        "qtype": "A",
+        "rcode": "REFUSED",
+        "flags": {
+          "QR": true,
+          "AA": false,
+          "TC": false,
+          "RD": true,
+          "RA": false
+        },
+        "transport": "udp",
+        "error": null,
+        "response_time_ms": 1.6277080000008937,
+        "attempts": 1
+      },
+      "probe_b": {
+        "qname": "owned.t07.lab.test",
+        "qtype": "SOA",
+        "rcode": "NOERROR",
+        "flags": {
+          "QR": true,
+          "AA": true,
+          "TC": false,
+          "RD": false,
+          "RA": false
+        },
+        "transport": "udp",
+        "error": null,
+        "response_time_ms": 1.4983930000198598,
+        "attempts": 1
+      }
+    },
+    {
+      "target_id": "t08",
+      "name": "knot-auth",
+      "ip": "172.28.0.108",
+      "serves_zone": "owned.t08.lab.test",
+      "label": "Authoritative-only",
+      "reason": "zone_answer_without_recursion",
+      "via_forwarder": false,
+      "nonce_seen": false,
+      "evidence_ids": [
+        "t08:651e54b03d1d:A"
+      ],
+      "probe_a": {
+        "qname": "651e54b03d1d.probe.lab.test",
+        "qtype": "A",
+        "rcode": "REFUSED",
+        "flags": {
+          "QR": true,
+          "AA": false,
+          "TC": false,
+          "RD": true,
+          "RA": false
+        },
+        "transport": "udp",
+        "error": null,
+        "response_time_ms": 1.011537000010776,
+        "attempts": 1
+      },
+      "probe_b": {
+        "qname": "owned.t08.lab.test",
+        "qtype": "SOA",
+        "rcode": "NOERROR",
+        "flags": {
+          "QR": true,
+          "AA": true,
+          "TC": false,
+          "RD": false,
+          "RA": false
+        },
+        "transport": "udp",
+        "error": null,
+        "response_time_ms": 1.986595000005309,
+        "attempts": 1
+      }
+    },
+    {
+      "target_id": "t09",
+      "name": "pdns-auth",
+      "ip": "172.28.0.109",
+      "serves_zone": "owned.t09.lab.test",
+      "label": "Authoritative-only",
+      "reason": "zone_answer_without_recursion",
+      "via_forwarder": false,
+      "nonce_seen": false,
+      "evidence_ids": [
+        "t09:3ab20fa45d0b:A"
+      ],
+      "probe_a": {
+        "qname": "3ab20fa45d0b.probe.lab.test",
+        "qtype": "A",
+        "rcode": "REFUSED",
+        "flags": {
+          "QR": true,
+          "AA": false,
+          "TC": false,
+          "RD": true,
+          "RA": false
+        },
+        "transport": "udp",
+        "error": null,
+        "response_time_ms": 2.1838150000235146,
+        "attempts": 1
+      },
+      "probe_b": {
+        "qname": "owned.t09.lab.test",
+        "qtype": "SOA",
+        "rcode": "NOERROR",
+        "flags": {
+          "QR": true,
+          "AA": true,
+          "TC": false,
+          "RD": false,
+          "RA": false
+        },
+        "transport": "udp",
+        "error": null,
+        "response_time_ms": 1.6007650000346985,
+        "attempts": 1
+      }
+    },
+    {
+      "target_id": "t10",
+      "name": "pdns-recursor",
+      "ip": "172.28.0.110",
+      "serves_zone": null,
+      "label": "Recursive",
+      "reason": "nonce_seen_in_auth_log",
+      "via_forwarder": false,
+      "nonce_seen": true,
+      "evidence_ids": [
+        "t10:fe7dca59f316:A"
+      ],
+      "probe_a": {
+        "qname": "fe7dca59f316.probe.lab.test",
+        "qtype": "A",
+        "rcode": "NOERROR",
+        "flags": {
+          "QR": true,
+          "AA": false,
+          "TC": false,
+          "RD": true,
+          "RA": true
+        },
+        "transport": "udp",
+        "error": null,
+        "response_time_ms": 6.128849999981867,
+        "attempts": 1
+      },
+      "probe_b": {
+        "qname": "",
+        "qtype": "SOA",
+        "rcode": "skipped",
+        "flags": {},
+        "transport": "none",
+        "error": "no serves_zone configured",
+        "response_time_ms": 0.0,
+        "attempts": 0
+      }
+    },
+    {
+      "target_id": "t11",
+      "name": "forwarder-open",
+      "ip": "172.28.0.111",
+      "serves_zone": null,
+      "label": "Recursive",
+      "reason": "nonce_seen_in_auth_log",
+      "via_forwarder": true,
+      "nonce_seen": true,
+      "evidence_ids": [
+        "t11:390c26067cb6:A"
+      ],
+      "probe_a": {
+        "qname": "390c26067cb6.probe.lab.test",
+        "qtype": "A",
+        "rcode": "NOERROR",
+        "flags": {
+          "QR": true,
+          "AA": false,
+          "TC": false,
+          "RD": true,
+          "RA": true
+        },
+        "transport": "udp",
+        "error": null,
+        "response_time_ms": 11.475274000019908,
+        "attempts": 1
+      },
+      "probe_b": {
+        "qname": "",
+        "qtype": "SOA",
+        "rcode": "skipped",
+        "flags": {},
+        "transport": "none",
+        "error": "no serves_zone configured",
+        "response_time_ms": 0.0,
+        "attempts": 0
+      }
+    },
+    {
+      "target_id": "t12",
+      "name": "forwarder-closed",
+      "ip": "172.28.0.112",
+      "serves_zone": null,
+      "label": "Refused",
+      "reason": "both_probes_refused",
+      "via_forwarder": false,
+      "nonce_seen": false,
+      "evidence_ids": [
+        "t12:35dfb046de6a:A"
+      ],
+      "probe_a": {
+        "qname": "35dfb046de6a.probe.lab.test",
+        "qtype": "A",
+        "rcode": "REFUSED",
+        "flags": {
+          "QR": true,
+          "AA": false,
+          "TC": false,
+          "RD": true,
+          "RA": false
+        },
+        "transport": "udp",
+        "error": null,
+        "response_time_ms": 2.4054030000115745,
+        "attempts": 1
+      },
+      "probe_b": {
+        "qname": "",
+        "qtype": "SOA",
+        "rcode": "skipped",
+        "flags": {},
+        "transport": "none",
+        "error": "no serves_zone configured",
+        "response_time_ms": 0.0,
+        "attempts": 0
+      }
+    },
+    {
+      "target_id": "t13",
+      "name": "firewall-drop",
+      "ip": "172.28.0.113",
+      "serves_zone": null,
+      "label": "Inconclusive",
+      "reason": "timeout",
+      "via_forwarder": false,
+      "nonce_seen": false,
+      "evidence_ids": [
+        "t13:9a7f3255a8c0:A"
+      ],
+      "probe_a": {
+        "qname": "9a7f3255a8c0.probe.lab.test",
+        "qtype": "A",
+        "rcode": "timeout",
+        "flags": {},
+        "transport": "udp",
+        "error": "timeout after 3 attempt(s)",
+        "response_time_ms": 3003.6246660000074,
+        "attempts": 3
+      },
+      "probe_b": {
+        "qname": "",
+        "qtype": "SOA",
+        "rcode": "skipped",
+        "flags": {},
+        "transport": "none",
+        "error": "no serves_zone configured",
+        "response_time_ms": 0.0,
+        "attempts": 0
+      }
+    },
+    {
+      "target_id": "t14",
+      "name": "servfail-server",
+      "ip": "172.28.0.114",
+      "serves_zone": null,
+      "label": "Inconclusive",
+      "reason": "servfail",
+      "via_forwarder": false,
+      "nonce_seen": false,
+      "evidence_ids": [
+        "t14:fc36a0731649:A"
+      ],
+      "probe_a": {
+        "qname": "fc36a0731649.probe.lab.test",
+        "qtype": "A",
+        "rcode": "SERVFAIL",
+        "flags": {
+          "QR": true,
+          "AA": false,
+          "TC": false,
+          "RD": true,
+          "RA": false
+        },
+        "transport": "udp",
+        "error": null,
+        "response_time_ms": 1.095763000023453,
+        "attempts": 1
+      },
+      "probe_b": {
+        "qname": "",
+        "qtype": "SOA",
+        "rcode": "skipped",
+        "flags": {},
+        "transport": "none",
+        "error": "no serves_zone configured",
+        "response_time_ms": 0.0,
+        "attempts": 0
+      }
+    },
+    {
+      "target_id": "t15",
+      "name": "rate-limited",
+      "ip": "172.28.0.115",
+      "serves_zone": null,
+      "label": "Recursive",
+      "reason": "nonce_seen_in_auth_log",
+      "via_forwarder": false,
+      "nonce_seen": true,
+      "evidence_ids": [
+        "t15:c876d9c6787b:A"
+      ],
+      "probe_a": {
+        "qname": "c876d9c6787b.probe.lab.test",
+        "qtype": "A",
+        "rcode": "NOERROR",
+        "flags": {
+          "QR": true,
+          "AA": false,
+          "TC": false,
+          "RD": true,
+          "RA": true
+        },
+        "transport": "udp",
+        "error": null,
+        "response_time_ms": 13.08862399997679,
+        "attempts": 1
+      },
+      "probe_b": {
+        "qname": "",
+        "qtype": "SOA",
+        "rcode": "skipped",
+        "flags": {},
+        "transport": "none",
+        "error": "no serves_zone configured",
+        "response_time_ms": 0.0,
+        "attempts": 0
+      }
+    },
+    {
+      "target_id": "t16",
+      "name": "tcp-truncate",
+      "ip": "172.28.0.116",
+      "serves_zone": null,
+      "label": "Recursive",
+      "reason": "nonce_seen_in_auth_log",
+      "via_forwarder": false,
+      "nonce_seen": true,
+      "evidence_ids": [
+        "t16:ccbe614b570d:A"
+      ],
+      "probe_a": {
+        "qname": "ccbe614b570d.probe.lab.test",
+        "qtype": "A",
+        "rcode": "NOERROR",
+        "flags": {
+          "QR": true,
+          "AA": false,
+          "TC": false,
+          "RD": true,
+          "RA": true
+        },
+        "transport": "tcp",
+        "error": null,
+        "response_time_ms": 25.362046999987342,
+        "attempts": 1
+      },
+      "probe_b": {
+        "qname": "",
+        "qtype": "SOA",
+        "rcode": "skipped",
+        "flags": {},
+        "transport": "none",
+        "error": "no serves_zone configured",
+        "response_time_ms": 0.0,
+        "attempts": 0
+      }
+    },
+    {
+      "target_id": "t17",
+      "name": "lying-resolver",
+      "ip": "172.28.0.117",
+      "serves_zone": null,
+      "label": "Inconclusive",
+      "reason": "answer_without_upstream_evidence",
+      "via_forwarder": false,
+      "nonce_seen": false,
+      "evidence_ids": [
+        "t17:c4e8b7ba9c9c:A"
+      ],
+      "probe_a": {
+        "qname": "c4e8b7ba9c9c.probe.lab.test",
+        "qtype": "A",
+        "rcode": "NOERROR",
+        "flags": {
+          "QR": true,
+          "AA": false,
+          "TC": false,
+          "RD": true,
+          "RA": true
+        },
+        "transport": "udp",
+        "error": null,
+        "response_time_ms": 1.8857620000289899,
+        "attempts": 1
+      },
+      "probe_b": {
+        "qname": "",
+        "qtype": "SOA",
+        "rcode": "skipped",
+        "flags": {},
+        "transport": "none",
+        "error": "no serves_zone configured",
+        "response_time_ms": 0.0,
+        "attempts": 0
+      }
+    },
+    {
+      "target_id": "t18",
+      "name": "high-latency",
+      "ip": "172.28.0.118",
+      "serves_zone": null,
+      "label": "Recursive",
+      "reason": "nonce_seen_in_auth_log",
+      "via_forwarder": false,
+      "nonce_seen": true,
+      "evidence_ids": [
+        "t18:4f22edb67bf6:A"
+      ],
+      "probe_a": {
+        "qname": "4f22edb67bf6.probe.lab.test",
+        "qtype": "A",
+        "rcode": "NOERROR",
+        "flags": {
+          "QR": true,
+          "AA": false,
+          "TC": false,
+          "RD": true,
+          "RA": true
+        },
+        "transport": "udp",
+        "error": null,
+        "response_time_ms": 1506.7672440000024,
+        "attempts": 1
+      },
+      "probe_b": {
+        "qname": "",
+        "qtype": "SOA",
+        "rcode": "skipped",
+        "flags": {},
+        "transport": "none",
+        "error": "no serves_zone configured",
+        "response_time_ms": 0.0,
+        "attempts": 0
+      }
+    },
+    {
+      "target_id": "t19",
+      "name": "packet-loss",
+      "ip": "172.28.0.119",
+      "serves_zone": null,
+      "label": "Recursive",
+      "reason": "nonce_seen_in_auth_log",
+      "via_forwarder": false,
+      "nonce_seen": true,
+      "evidence_ids": [
+        "t19:0dcb62fb7c57:A"
+      ],
+      "probe_a": {
+        "qname": "0dcb62fb7c57.probe.lab.test",
+        "qtype": "A",
+        "rcode": "NOERROR",
+        "flags": {
+          "QR": true,
+          "AA": false,
+          "TC": false,
+          "RD": true,
+          "RA": true
+        },
+        "transport": "udp",
+        "error": null,
+        "response_time_ms": 6.430930000021817,
+        "attempts": 1
+      },
+      "probe_b": {
+        "qname": "",
+        "qtype": "SOA",
+        "rcode": "skipped",
+        "flags": {},
+        "transport": "none",
+        "error": "no serves_zone configured",
+        "response_time_ms": 0.0,
+        "attempts": 0
+      }
+    },
+    {
+      "target_id": "t20",
+      "name": "auth-refuse-else",
+      "ip": "172.28.0.120",
+      "serves_zone": "owned.t20.lab.test",
+      "label": "Authoritative-only",
+      "reason": "zone_answer_without_recursion",
+      "via_forwarder": false,
+      "nonce_seen": false,
+      "evidence_ids": [
+        "t20:34e25e402bb0:A"
+      ],
+      "probe_a": {
+        "qname": "34e25e402bb0.probe.lab.test",
+        "qtype": "A",
+        "rcode": "REFUSED",
+        "flags": {
+          "QR": true,
+          "AA": false,
+          "TC": false,
+          "RD": true,
+          "RA": false
+        },
+        "transport": "udp",
+        "error": null,
+        "response_time_ms": 1.5903970000294976,
+        "attempts": 1
+      },
+      "probe_b": {
+        "qname": "owned.t20.lab.test",
+        "qtype": "SOA",
+        "rcode": "NOERROR",
+        "flags": {
+          "QR": true,
+          "AA": true,
+          "TC": false,
+          "RD": false,
+          "RA": false
+        },
+        "transport": "udp",
+        "error": null,
+        "response_time_ms": 2.1523910000382784,
+        "attempts": 1
+      }
+    }
+  ],
+  "predictions": {
+    "t01": "Recursive",
+    "t02": "Refused",
+    "t03": "Recursive",
+    "t04": "Refused",
+    "t05": "Recursive",
+    "t06": "Recursive",
+    "t07": "Authoritative-only",
+    "t08": "Authoritative-only",
+    "t09": "Authoritative-only",
+    "t10": "Recursive",
+    "t11": "Recursive",
+    "t12": "Refused",
+    "t13": "Inconclusive",
+    "t14": "Inconclusive",
+    "t15": "Recursive",
+    "t16": "Recursive",
+    "t17": "Inconclusive",
+    "t18": "Recursive",
+    "t19": "Recursive",
+    "t20": "Authoritative-only"
+  }
+}

@@ -39,6 +39,8 @@ def handle_query(data: bytes, addr: tuple, sock: socket.socket) -> None:
             probe_zone = dns.name.from_text("probe.lab.test.")
             if qname.is_subdomain(probe_zone):
                 upstream_resp = dns.query.udp(request, AUTHZONE_IP, timeout=2.0)
+                upstream_resp.flags &= ~dns.flags.AA
+                upstream_resp.flags |= dns.flags.RA | (request.flags & dns.flags.RD)
                 sock.sendto(upstream_resp.to_wire(), addr)
                 return
         response = dns.message.make_response(request)

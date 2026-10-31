@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>DNSAssess Report</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2em; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ddd; padding: 8px; }
+    th { background: #f4f4f4; }
+    .rec { background: #d4edda; }
+    .inc { background: #f8d7da; }
+    .auth { background: #dbeafe; }
+    .refused { background: #fef3c7; }
+    .other { background: #e2e3e5; }
+  </style>
+</head>
+<body>
+  <h1>DNS Resolver Exposure Assessment Report</h1>
+  <p><strong>Tool version:</strong> 0.0.0 | <strong>Seed:</strong> phase4-rate-check | <strong>Config hash:</strong> cb561151f53be22fe241ea51d48d1d706900f63faf8573f2ced24accb3551040</p>
+  <p><strong>Start:</strong> 2026-10-29T05:32:17.722825+00:00 | <strong>End:</strong> 2026-10-29T05:32:34.828526+00:00</p>
+
+  <h2>Summary</h2>
+  <ul>
+    <li>Recursive: 10</li>
+    <li>Authoritative-only: 4</li>
+    <li>Refused: 3</li>
+    <li>Inconclusive: 3</li>
+  </ul>
+
+  <h2>Per-target results</h2>
+  <table>
+    <tr><th>ID</th><th>Name</th><th>IP</th><th>Label</th><th>Reason</th><th>via_forwarder</th><th>latency_ms</th></tr>
+    
+    
+    <tr class="rec">
+      <td>t01</td>
+      <td>bind-open</td>
+      <td>172.28.0.101</td>
+      <td>Recursive</td>
+      <td>nonce_seen_in_auth_log</td>
+      <td>False</td>
+      <td>8.02</td>
+    </tr>
+    
+    
+    <tr class="refused">
+      <td>t02</td>
+      <td>bind-closed</td>
+      <td>172.28.0.102</td>
+      <td>Refused</td>
+      <td>both_probes_refused</td>
+      <td>False</td>
+      <td>1.68</td>
+    </tr>
+    
+    
+    <tr class="rec">
+      <td>t03</td>
+      <td>unbound-open</td>
+      <td>172.28.0.103</td>
+      <td>Recursive</td>
+      <td>nonce_seen_in_auth_log</td>
+      <td>False</td>
+      <td>7.96</td>
+    </tr>
+    
+    
+    <tr class="refused">
+      <td>t04</td>
+      <td>unbound-refused</td>
+      <td>172.28.0.104</td>
+      <td>Refused</td>
+      <td>both_probes_refused</td>
+      <td>False</td>
+      <td>1.18</td>
+    </tr>
+    
+    
+    <tr class="rec">
+      <td>t05</td>
+      <td>kresd-open</td>
+      <td>172.28.0.105</td>
+      <td>Recursive</td>
+      <td>nonce_seen_in_auth_log</td>
+      <td>False</td>
+      <td>7.67</td>
+    </tr>
+    
+    
+    <tr class="rec">
+      <td>t06</td>
+      <td>dnsmasq-fwd</td>
+      <td>172.28.0.106</td>
+      <td>Recursive</td>
+      <td>nonce_seen_in_auth_log</td>
+      <td>False</td>
+      <td>7.71</td>
+    </tr>
+    
+    
+    <tr class="auth">
+      <td>t07</td>
+      <td>nsd-auth</td>
+      <td>172.28.0.107</td>
+      <td>Authoritative-only</td>
+      <td>zone_answer_without_recursion</td>
+      <td>False</td>
+      <td>1.79</td>
+    </tr>
+    
+    
+    <tr class="auth">
+      <td>t08</td>
+      <td>knot-auth</td>
+      <td>172.28.0.108</td>
+      <td>Authoritative-only</td>
+      <td>zone_answer_without_recursion</td>
+      <td>False</td>
+      <td>1.65</td>
+    </tr>
+    
+    
+    <tr class="auth">
+      <td>t09</td>
+      <td>pdns-auth</td>
+      <td>172.28.0.109</td>
+      <td>Authoritative-only</td>
+      <td>zone_answer_without_recursion</td>
+      <td>False</td>
+      <td>1.34</td>
+    </tr>
+    
+    
+    <tr class="rec">
+      <td>t10</td>
+      <td>pdns-recursor</td>
+      <td>172.28.0.110</td>
+      <td>Recursive</td>
+      <td>nonce_seen_in_auth_log</td>
+      <td>False</td>
+      <td>6.59</td>
+    </tr>
+    
+    
+    <tr class="rec">
+      <td>t11</td>
+      <td>forwarder-open</td>
+      <td>172.28.0.111</td>
+      <td>Recursive</td>
+      <td>nonce_seen_in_auth_log</td>
+      <td>True</td>
+      <td>10.45</td>
+    </tr>
+    
+    
+    <tr class="refused">
+      <td>t12</td>
+      <td>forwarder-closed</td>
+      <td>172.28.0.112</td>
+      <td>Refused</td>
+      <td>both_probes_refused</td>
+      <td>False</td>
+      <td>3.54</td>
+    </tr>
+    
+    
+    <tr class="inc">
+      <td>t13</td>
+      <td>firewall-drop</td>
+      <td>172.28.0.113</td>
+      <td>Inconclusive</td>
+      <td>timeout</td>
+      <td>False</td>
+      <td>3003.78</td>
+    </tr>
+    
+    
+    <tr class="inc">
+      <td>t14</td>
+      <td>servfail-server</td>
+      <td>172.28.0.114</td>
+      <td>Inconclusive</td>
+      <td>servfail</td>
+      <td>False</td>
+      <td>1.23</td>
+    </tr>
+    
+    
+    <tr class="rec">
+      <td>t15</td>
+      <td>rate-limited</td>
+      <td>172.28.0.115</td>
+      <td>Recursive</td>
+      <td>nonce_seen_in_auth_log</td>
+      <td>False</td>
+      <td>6.54</td>
+    </tr>
+    
+    
+    <tr class="rec">
+      <td>t16</td>
+      <td>tcp-truncate</td>
+      <td>172.28.0.116</td>
+      <td>Recursive</td>
+      <td>nonce_seen_in_auth_log</td>
+      <td>False</td>
+      <td>16.97</td>
+    </tr>
+    
+    
+    <tr class="inc">
+      <td>t17</td>
+      <td>lying-resolver</td>
+      <td>172.28.0.117</td>
+      <td>Inconclusive</td>
+      <td>answer_without_upstream_evidence</td>
+      <td>False</td>
+      <td>2.11</td>
+    </tr>
+    
+    
+    <tr class="rec">
+      <td>t18</td>
+      <td>high-latency</td>
+      <td>172.28.0.118</td>
+      <td>Recursive</td>
+      <td>nonce_seen_in_auth_log</td>
+      <td>False</td>
+      <td>1508.40</td>
+    </tr>
+    
+    
+    <tr class="rec">
+      <td>t19</td>
+      <td>packet-loss</td>
+      <td>172.28.0.119</td>
+      <td>Recursive</td>
+      <td>nonce_seen_in_auth_log</td>
+      <td>False</td>
+      <td>7.87</td>
+    </tr>
+    
+    
+    <tr class="auth">
+      <td>t20</td>
+      <td>auth-refuse-else</td>
+      <td>172.28.0.120</td>
+      <td>Authoritative-only</td>
+      <td>zone_answer_without_recursion</td>
+      <td>False</td>
+      <td>1.36</td>
+    </tr>
+    
+  </table>
+
+  
+  <h2>Confusion Matrix</h2>
+  <p>Accuracy: 100.0% (20/20)</p>
+  <table>
+    <tr>
+      <th>Truth \ Predicted</th>
+      
+      <th>Recursive</th>
+      
+      <th>Authoritative-only</th>
+      
+      <th>Refused</th>
+      
+      <th>Inconclusive</th>
+      
+    </tr>
+    
+    <tr>
+      <th>Recursive</th>
+      
+      <td>10</td>
+      
+      <td>0</td>
+      
+      <td>0</td>
+      
+      <td>0</td>
+      
+    </tr>
+    
+    <tr>
+      <th>Authoritative-only</th>
+      
+      <td>0</td>
+      
+      <td>4</td>
+      
+      <td>0</td>
+      
+      <td>0</td>
+      
+    </tr>
+    
+    <tr>
+      <th>Refused</th>
+      
+      <td>0</td>
+      
+      <td>0</td>
+      
+      <td>3</td>
+      
+      <td>0</td>
+      
+    </tr>
+    
+    <tr>
+      <th>Inconclusive</th>
+      
+      <td>0</td>
+      
+      <td>0</td>
+      
+      <td>0</td>
+      
+      <td>3</td>
+      
+    </tr>
+    
+  </table>
+  
+  <p>No mismatches.</p>
+  
+  
+
+  <h2>Remediation</h2>
+  
+  <div style="border:1px solid #ccc; padding:1em; background:#fff3cd;">
+    <strong>t01 (bind-open):</strong> Restrict recursion to intended clients with an access control list (RFC 5358 / BCP 140). Block outside access to recursive service.
+  </div>
+  
+  <div style="border:1px solid #ccc; padding:1em; background:#fff3cd;">
+    <strong>t03 (unbound-open):</strong> Restrict recursion to intended clients with an access control list (RFC 5358 / BCP 140). Block outside access to recursive service.
+  </div>
+  
+  <div style="border:1px solid #ccc; padding:1em; background:#fff3cd;">
+    <strong>t05 (kresd-open):</strong> Restrict recursion to intended clients with an access control list (RFC 5358 / BCP 140). Block outside access to recursive service.
+  </div>
+  
+  <div style="border:1px solid #ccc; padding:1em; background:#fff3cd;">
+    <strong>t06 (dnsmasq-fwd):</strong> Restrict recursion to intended clients with an access control list (RFC 5358 / BCP 140). Block outside access to recursive service.
+  </div>
+  
+  <div style="border:1px solid #ccc; padding:1em; background:#fff3cd;">
+    <strong>t10 (pdns-recursor):</strong> Restrict recursion to intended clients with an access control list (RFC 5358 / BCP 140). Block outside access to recursive service.
+  </div>
+  
+  <div style="border:1px solid #ccc; padding:1em; background:#fff3cd;">
+    <strong>t11 (forwarder-open):</strong> Restrict recursion to intended clients with an access control list (RFC 5358 / BCP 140). Block outside access to recursive service.
+  </div>
+  
+  <div style="border:1px solid #ccc; padding:1em; background:#fff3cd;">
+    <strong>t15 (rate-limited):</strong> Restrict recursion to intended clients with an access control list (RFC 5358 / BCP 140). Block outside access to recursive service.
+  </div>
+  
+  <div style="border:1px solid #ccc; padding:1em; background:#fff3cd;">
+    <strong>t16 (tcp-truncate):</strong> Restrict recursion to intended clients with an access control list (RFC 5358 / BCP 140). Block outside access to recursive service.
+  </div>
+  
+  <div style="border:1px solid #ccc; padding:1em; background:#fff3cd;">
+    <strong>t18 (high-latency):</strong> Restrict recursion to intended clients with an access control list (RFC 5358 / BCP 140). Block outside access to recursive service.
+  </div>
+  
+  <div style="border:1px solid #ccc; padding:1em; background:#fff3cd;">
+    <strong>t19 (packet-loss):</strong> Restrict recursion to intended clients with an access control list (RFC 5358 / BCP 140). Block outside access to recursive service.
+  </div>
+  
+</body>
+</html>

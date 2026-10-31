@@ -105,6 +105,11 @@ class Prober:
         """Send one query: UDP with timeout retries, TCP fallback only on TC."""
         qname_text = str(qname)
         query = dns.message.make_query(qname_text, rdtype)
+        # Honour the requested RD bit (probe A: RD=1, probe B: RD=0).
+        if rd:
+            query.flags |= dns.flags.RD
+        else:
+            query.flags &= ~dns.flags.RD
         query.use_edns(edns=0, ednsflags=0, payload=self.edns_payload)
 
         response: Optional[dns.message.Message] = None

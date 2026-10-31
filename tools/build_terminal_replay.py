@@ -67,7 +67,7 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
   <p class="sub">Recordings of the real runs, with silent gaps compressed.
   Play, scrub the bar, switch 1x / 2x / 4x, space toggles. To re-run it yourself:
   install the two manual prerequisites (Docker and <code>uv</code>, see the README),
-  then <code>make demo</code>.</p>
+  then <code>uv run --directory src python run_demo.py</code>.</p>
   <div class="segs" id="tabs" role="tablist"></div>
   <div class="screen">
     <pre id="term"></pre>
@@ -79,14 +79,15 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
     </div>
   </div>
   <p class="note">
-    <strong>Replay 1</strong>: <code>make demo</code>, the one-command demo: canary
+    <strong>Replay 1</strong>: <code>uv run --directory src python run_demo.py</code>, the one-command demo: canary
     self-check, lab up, scan of 20 authorised targets, compare, <strong>20/20
     accuracy</strong>, reports written.<br>
-    <strong>Replay 2</strong>: <code>make verify-rate</code>: captured traffic peaks
-    at <strong>1 qps per target (cap 1)</strong> and 5 qps global (cap 5); 30 DNS
-    questions including one self-check control query.<br>
-    <strong>Replay 3</strong>: kill switch: <code>touch /app/KILL</code> mid-scan,
-    then "kill switch triggered; stopping cleanly" at 13 targets, exit 0.<br>
+    <strong>Replay 2</strong>: <code>uv run --directory src python verify_rate.py</code>:
+    captured traffic peaks at <strong>1 qps per target (cap 1)</strong> and
+    5 qps global (cap 5); <strong>24 DNS queries</strong> captured.<br>
+    <strong>Replay 3</strong>: a delayed <code>touch KILL</code> during the
+    authorised scan triggers "kill switch triggered; stopping cleanly" at
+    13 targets, exit 0.<br>
     Source: the committed <code>*.cast</code> files next to this page. Rebuild with
     <code>uv run python tools/build_terminal_replay.py</code>.
   </p>

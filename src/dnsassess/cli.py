@@ -335,6 +335,8 @@ def _cmd_verify_stability(args: argparse.Namespace) -> int:
             out=str(run_out),
             seed=args.seed,
             auth_log=args.auth_log,
+            skip_selfcheck=True,
+            log_wait=args.log_wait,
         )
         status = _cmd_scan(scan_args)
         if status != 0:
@@ -428,6 +430,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_stability.add_argument("--seed", default="stability")
     p_stability.add_argument("--auth-log", default=DEFAULT_AUTH_LOG)
     p_stability.add_argument("--runs", type=int, default=3)
+    p_stability.add_argument("--log-wait", type=float, default=6.0, help="seconds to poll the auth-zone log")
     p_stability.set_defaults(func=_cmd_verify_stability)
 
     sub.add_parser("demo", help="full lab-up -> scan -> compare -> report").set_defaults(

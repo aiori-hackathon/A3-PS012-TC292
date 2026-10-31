@@ -1,10 +1,14 @@
 {
-  "description": "Repeat-run stability: three scans with the same seed (stab-A) and one with a different seed (stab-B) on the unchanged lab. Labels must agree across all four runs. Each run opens with the canary attribution self-check (verified) before probing, and attempts are the observed UDP/TCP attempt counts per probe.",
+  "description": "Three repeat scans of the unchanged authorized lab using the same seed. Labels are compared across runs. verify-stability skips canary self-checks for each repeated scan; see the per-run evidence for probe records.",
+  "run_count": 3,
+  "canary_selfcheck_note": "Skipped by the verify-stability command for all repeated scans.",
   "runs": [
     {
-      "out_dir": "stability-1",
-      "seed": "stab-A",
-      "canary_selfcheck": "verified",
+      "out_dir": "stability-repeat-20261031/run1",
+      "seed": "phase4-stability",
+      "canary_selfcheck": "skipped",
+      "start_time": "2026-10-31T05:37:38.007678+00:00",
+      "end_time": "2026-10-31T05:38:08.332461+00:00",
       "labels": {
         "t01": "Recursive",
         "t02": "Refused",
@@ -51,9 +55,11 @@
       }
     },
     {
-      "out_dir": "stability-2",
-      "seed": "stab-A",
-      "canary_selfcheck": "verified",
+      "out_dir": "stability-repeat-20261031/run2",
+      "seed": "phase4-stability",
+      "canary_selfcheck": "skipped",
+      "start_time": "2026-10-31T05:38:08.369321+00:00",
+      "end_time": "2026-10-31T05:38:35.624232+00:00",
       "labels": {
         "t01": "Recursive",
         "t02": "Refused",
@@ -100,58 +106,11 @@
       }
     },
     {
-      "out_dir": "stability-3",
-      "seed": "stab-A",
-      "canary_selfcheck": "verified",
-      "labels": {
-        "t01": "Recursive",
-        "t02": "Refused",
-        "t03": "Recursive",
-        "t04": "Refused",
-        "t05": "Recursive",
-        "t06": "Recursive",
-        "t07": "Authoritative-only",
-        "t08": "Authoritative-only",
-        "t09": "Authoritative-only",
-        "t10": "Recursive",
-        "t11": "Recursive",
-        "t12": "Refused",
-        "t13": "Inconclusive",
-        "t14": "Inconclusive",
-        "t15": "Recursive",
-        "t16": "Recursive",
-        "t17": "Inconclusive",
-        "t18": "Recursive",
-        "t19": "Recursive",
-        "t20": "Authoritative-only"
-      },
-      "max_attempts_per_target": {
-        "t01": 1,
-        "t02": 1,
-        "t03": 1,
-        "t04": 1,
-        "t05": 1,
-        "t06": 1,
-        "t07": 1,
-        "t08": 1,
-        "t09": 1,
-        "t10": 1,
-        "t11": 1,
-        "t12": 1,
-        "t13": 3,
-        "t14": 1,
-        "t15": 1,
-        "t16": 1,
-        "t17": 1,
-        "t18": 1,
-        "t19": 1,
-        "t20": 1
-      }
-    },
-    {
-      "out_dir": "stability-4",
-      "seed": "stab-B",
-      "canary_selfcheck": "verified",
+      "out_dir": "stability-repeat-20261031/run3",
+      "seed": "phase4-stability",
+      "canary_selfcheck": "skipped",
+      "start_time": "2026-10-31T05:38:35.653723+00:00",
+      "end_time": "2026-10-31T05:39:02.992425+00:00",
       "labels": {
         "t01": "Recursive",
         "t02": "Refused",

@@ -19,7 +19,10 @@ def resolve_upstream(request: dns.message.Message) -> dns.message.Message:
         q = request.question[0]
         probe_zone = dns.name.from_text("probe.lab.test.")
         if q.name.is_subdomain(probe_zone):
-            return dns.query.udp(request, AUTHZONE_IP, timeout=2.0)
+            upstream = dns.query.udp(request, AUTHZONE_IP, timeout=2.0)
+            upstream.flags &= ~dns.flags.AA
+            upstream.flags |= dns.flags.RA | (request.flags & dns.flags.RD)
+            return upstream
     response = dns.message.make_response(request)
     response.set_rcode(dns.rcode.REFUSED)
     return response

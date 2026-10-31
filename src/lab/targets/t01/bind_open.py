@@ -50,6 +50,8 @@ def handle_query(data: bytes, addr: tuple, sock: socket.socket) -> None:
             return
         if q.name.is_subdomain(PROBE_ZONE):
             response = dns.query.udp(request, AUTHZONE_IP, timeout=2.0)
+            response.flags &= ~dns.flags.AA
+            response.flags |= dns.flags.RA | (request.flags & dns.flags.RD)
             sock.sendto(response.to_wire(), addr)
             return
         response = dns.message.make_response(request)
@@ -82,6 +84,8 @@ def handle_tcp_query(conn: socket.socket, addr: tuple) -> None:
             response = build_auth_response(request)
         elif q.name.is_subdomain(PROBE_ZONE):
             response = dns.query.udp(request, AUTHZONE_IP, timeout=2.0)
+            response.flags &= ~dns.flags.AA
+            response.flags |= dns.flags.RA | (request.flags & dns.flags.RD)
         else:
             response = dns.message.make_response(request)
             response.flags |= dns.flags.RA

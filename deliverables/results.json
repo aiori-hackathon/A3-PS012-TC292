@@ -1,21 +1,21 @@
 {
   "run_metadata": {
     "tool_version": "0.1.0",
-    "seed": "final-A",
-    "config_hash": "3891c9df72f44df9ba9ac8bd837be403669f63b70de280f74020c7de89a4c747",
+    "seed": "integration",
+    "config_hash": "bb91b9bdf02d70d73dbc0b0f499dd14367cabf2703b223b6250bb06f170abad7",
     "scope_path": "/app/config/scope.yaml",
     "rate_path": "/app/config/rate.yaml",
-    "start_time": "2026-10-30T15:36:01.525732+00:00",
-    "end_time": "2026-10-30T15:36:28.924637+00:00",
+    "start_time": "2026-10-30T21:50:21.993927+00:00",
+    "end_time": "2026-10-30T21:50:49.521918+00:00",
     "canary_selfcheck": {
       "status": "verified",
-      "control_qname": "selfcheck-bd0a61e4.probe.lab.test.",
+      "control_qname": "selfcheck-3927d439.probe.lab.test.",
       "client_ip": "172.28.0.2",
       "observed_src_ip": "172.28.0.2",
       "rcode": "NOERROR",
-      "response_time_ms": 1.812,
+      "response_time_ms": 6.801,
       "attempts": 1,
-      "log_poll_seconds": 0.033,
+      "log_poll_seconds": 0.118,
       "error": null
     }
   },
@@ -30,22 +30,22 @@
       "via_forwarder": false,
       "nonce_seen": true,
       "evidence_ids": [
-        "t01:b1d0e6c94d19:A"
+        "t01:30e9892d4aaa:A"
       ],
       "probe_a": {
-        "qname": "b1d0e6c94d19.probe.lab.test",
+        "qname": "30e9892d4aaa.probe.lab.test",
         "qtype": "A",
         "rcode": "NOERROR",
         "flags": {
           "QR": true,
-          "AA": true,
+          "AA": false,
           "TC": false,
-          "RD": false,
-          "RA": false
+          "RD": true,
+          "RA": true
         },
         "transport": "udp",
         "error": null,
-        "response_time_ms": 2.8002789986203425,
+        "response_time_ms": 6.940391000057389,
         "attempts": 1
       },
       "probe_b": {
@@ -56,12 +56,12 @@
           "QR": true,
           "AA": true,
           "TC": false,
-          "RD": true,
+          "RD": false,
           "RA": false
         },
         "transport": "udp",
         "error": null,
-        "response_time_ms": 1.6727400015952298,
+        "response_time_ms": 3.0897069999582527,
         "attempts": 1
       }
     },
@@ -75,10 +75,10 @@
       "via_forwarder": false,
       "nonce_seen": false,
       "evidence_ids": [
-        "t02:b7d3408fd629:A"
+        "t02:65e20f55baa0:A"
       ],
       "probe_a": {
-        "qname": "b7d3408fd629.probe.lab.test",
+        "qname": "65e20f55baa0.probe.lab.test",
         "qtype": "A",
         "rcode": "REFUSED",
         "flags": {
@@ -90,7 +90,7 @@
         },
         "transport": "udp",
         "error": null,
-        "response_time_ms": 1.7070859994419152,
+        "response_time_ms": 1.5112009999711518,
         "attempts": 1
       },
       "probe_b": {
@@ -101,12 +101,12 @@
           "QR": true,
           "AA": false,
           "TC": false,
-          "RD": true,
+          "RD": false,
           "RA": false
         },
         "transport": "udp",
         "error": null,
-        "response_time_ms": 1.2999380014662165,
+        "response_time_ms": 1.4708389999213978,
         "attempts": 1
       }
     },
@@ -120,22 +120,22 @@
       "via_forwarder": false,
       "nonce_seen": true,
       "evidence_ids": [
-        "t03:d804b091b29d:A"
+        "t03:db2a20e89a91:A"
       ],
       "probe_a": {
-        "qname": "d804b091b29d.probe.lab.test",
+        "qname": "db2a20e89a91.probe.lab.test",
         "qtype": "A",
         "rcode": "NOERROR",
         "flags": {
           "QR": true,
-          "AA": true,
+          "AA": false,
           "TC": false,
-          "RD": false,
-          "RA": false
+          "RD": true,
+          "RA": true
         },
         "transport": "udp",
         "error": null,
-        "response_time_ms": 2.4763900000834838,
+        "response_time_ms": 7.52758700002687,
         "attempts": 1
       },
       "probe_b": {
@@ -159,10 +159,10 @@
       "via_forwarder": false,
       "nonce_seen": false,
       "evidence_ids": [
-        "t04:7793a93f4215:A"
+        "t04:81d92e5af879:A"
       ],
       "probe_a": {
-        "qname": "7793a93f4215.probe.lab.test",
+        "qname": "81d92e5af879.probe.lab.test",
         "qtype": "A",
         "rcode": "REFUSED",
         "flags": {
@@ -174,7 +174,7 @@
         },
         "transport": "udp",
         "error": null,
-        "response_time_ms": 1.2440319987945259,
+        "response_time_ms": 1.1371089999556716,
         "attempts": 1
       },
       "probe_b": {
@@ -198,22 +198,22 @@
       "via_forwarder": false,
       "nonce_seen": true,
       "evidence_ids": [
-        "t05:050b1ffc515f:A"
+        "t05:a75b5817b221:A"
       ],
       "probe_a": {
-        "qname": "050b1ffc515f.probe.lab.test",
+        "qname": "a75b5817b221.probe.lab.test",
         "qtype": "A",
         "rcode": "NOERROR",
         "flags": {
           "QR": true,
-          "AA": true,
+          "AA": false,
           "TC": false,
-          "RD": false,
-          "RA": false
+          "RD": true,
+          "RA": true
         },
         "transport": "udp",
         "error": null,
-        "response_time_ms": 2.7602120007941267,
+        "response_time_ms": 7.053876999975728,
         "attempts": 1
       },
       "probe_b": {
@@ -237,22 +237,22 @@
       "via_forwarder": false,
       "nonce_seen": true,
       "evidence_ids": [
-        "t06:8165b688501d:A"
+        "t06:0c8f0b050a96:A"
       ],
       "probe_a": {
-        "qname": "8165b688501d.probe.lab.test",
+        "qname": "0c8f0b050a96.probe.lab.test",
         "qtype": "A",
         "rcode": "NOERROR",
         "flags": {
           "QR": true,
-          "AA": true,
+          "AA": false,
           "TC": false,
-          "RD": false,
-          "RA": false
+          "RD": true,
+          "RA": true
         },
         "transport": "udp",
         "error": null,
-        "response_time_ms": 2.6544200009084307,
+        "response_time_ms": 8.06672399994568,
         "attempts": 1
       },
       "probe_b": {
@@ -276,10 +276,10 @@
       "via_forwarder": false,
       "nonce_seen": false,
       "evidence_ids": [
-        "t07:4957ddf45e99:A"
+        "t07:69c9d0b89b2d:A"
       ],
       "probe_a": {
-        "qname": "4957ddf45e99.probe.lab.test",
+        "qname": "69c9d0b89b2d.probe.lab.test",
         "qtype": "A",
         "rcode": "REFUSED",
         "flags": {
@@ -291,7 +291,7 @@
         },
         "transport": "udp",
         "error": null,
-        "response_time_ms": 1.1536609999893699,
+        "response_time_ms": 1.2437130000080288,
         "attempts": 1
       },
       "probe_b": {
@@ -302,12 +302,12 @@
           "QR": true,
           "AA": true,
           "TC": false,
-          "RD": true,
+          "RD": false,
           "RA": false
         },
         "transport": "udp",
         "error": null,
-        "response_time_ms": 1.3344830003916286,
+        "response_time_ms": 1.958043999934489,
         "attempts": 1
       }
     },
@@ -321,10 +321,10 @@
       "via_forwarder": false,
       "nonce_seen": false,
       "evidence_ids": [
-        "t08:b0810e9d61c4:A"
+        "t08:bae11d256597:A"
       ],
       "probe_a": {
-        "qname": "b0810e9d61c4.probe.lab.test",
+        "qname": "bae11d256597.probe.lab.test",
         "qtype": "A",
         "rcode": "REFUSED",
         "flags": {
@@ -336,7 +336,7 @@
         },
         "transport": "udp",
         "error": null,
-        "response_time_ms": 1.0641959997883532,
+        "response_time_ms": 1.039275000039197,
         "attempts": 1
       },
       "probe_b": {
@@ -347,12 +347,12 @@
           "QR": true,
           "AA": true,
           "TC": false,
-          "RD": true,
+          "RD": false,
           "RA": false
         },
         "transport": "udp",
         "error": null,
-        "response_time_ms": 1.3389519990596455,
+        "response_time_ms": 1.6193550000025425,
         "attempts": 1
       }
     },
@@ -366,10 +366,10 @@
       "via_forwarder": false,
       "nonce_seen": false,
       "evidence_ids": [
-        "t09:b9787605702f:A"
+        "t09:452ed1c653a6:A"
       ],
       "probe_a": {
-        "qname": "b9787605702f.probe.lab.test",
+        "qname": "452ed1c653a6.probe.lab.test",
         "qtype": "A",
         "rcode": "REFUSED",
         "flags": {
@@ -381,7 +381,7 @@
         },
         "transport": "udp",
         "error": null,
-        "response_time_ms": 0.9891720001178328,
+        "response_time_ms": 0.9703109999463777,
         "attempts": 1
       },
       "probe_b": {
@@ -392,12 +392,12 @@
           "QR": true,
           "AA": true,
           "TC": false,
-          "RD": true,
+          "RD": false,
           "RA": false
         },
         "transport": "udp",
         "error": null,
-        "response_time_ms": 1.4516489991365233,
+        "response_time_ms": 2.4328300000888703,
         "attempts": 1
       }
     },
@@ -411,22 +411,22 @@
       "via_forwarder": false,
       "nonce_seen": true,
       "evidence_ids": [
-        "t10:19b6ee1bb14c:A"
+        "t10:0e42001d5b65:A"
       ],
       "probe_a": {
-        "qname": "19b6ee1bb14c.probe.lab.test",
+        "qname": "0e42001d5b65.probe.lab.test",
         "qtype": "A",
         "rcode": "NOERROR",
         "flags": {
           "QR": true,
-          "AA": true,
+          "AA": false,
           "TC": false,
-          "RD": false,
-          "RA": false
+          "RD": true,
+          "RA": true
         },
         "transport": "udp",
         "error": null,
-        "response_time_ms": 2.419532000203617,
+        "response_time_ms": 7.094570999925054,
         "attempts": 1
       },
       "probe_b": {
@@ -450,22 +450,22 @@
       "via_forwarder": true,
       "nonce_seen": true,
       "evidence_ids": [
-        "t11:8b59c9064ff3:A"
+        "t11:7186a60c96df:A"
       ],
       "probe_a": {
-        "qname": "8b59c9064ff3.probe.lab.test",
+        "qname": "7186a60c96df.probe.lab.test",
         "qtype": "A",
         "rcode": "NOERROR",
         "flags": {
           "QR": true,
-          "AA": true,
+          "AA": false,
           "TC": false,
-          "RD": false,
-          "RA": false
+          "RD": true,
+          "RA": true
         },
         "transport": "udp",
         "error": null,
-        "response_time_ms": 4.593591000229935,
+        "response_time_ms": 6.944296000028771,
         "attempts": 1
       },
       "probe_b": {
@@ -489,10 +489,10 @@
       "via_forwarder": false,
       "nonce_seen": false,
       "evidence_ids": [
-        "t12:608719e129db:A"
+        "t12:1716fd1dccac:A"
       ],
       "probe_a": {
-        "qname": "608719e129db.probe.lab.test",
+        "qname": "1716fd1dccac.probe.lab.test",
         "qtype": "A",
         "rcode": "REFUSED",
         "flags": {
@@ -504,7 +504,7 @@
         },
         "transport": "udp",
         "error": null,
-        "response_time_ms": 1.9262919995526318,
+        "response_time_ms": 2.296081999929811,
         "attempts": 1
       },
       "probe_b": {
@@ -528,16 +528,16 @@
       "via_forwarder": false,
       "nonce_seen": false,
       "evidence_ids": [
-        "t13:b8c25120fcb9:A"
+        "t13:66b791a6925a:A"
       ],
       "probe_a": {
-        "qname": "b8c25120fcb9.probe.lab.test",
+        "qname": "66b791a6925a.probe.lab.test",
         "qtype": "A",
         "rcode": "timeout",
         "flags": {},
         "transport": "udp",
         "error": "timeout after 3 attempt(s)",
-        "response_time_ms": 3002.3972720009624,
+        "response_time_ms": 3003.900955000063,
         "attempts": 3
       },
       "probe_b": {
@@ -561,10 +561,10 @@
       "via_forwarder": false,
       "nonce_seen": false,
       "evidence_ids": [
-        "t14:2b36ed7202a6:A"
+        "t14:0b62a60e7655:A"
       ],
       "probe_a": {
-        "qname": "2b36ed7202a6.probe.lab.test",
+        "qname": "0b62a60e7655.probe.lab.test",
         "qtype": "A",
         "rcode": "SERVFAIL",
         "flags": {
@@ -576,7 +576,7 @@
         },
         "transport": "udp",
         "error": null,
-        "response_time_ms": 1.3638049986184342,
+        "response_time_ms": 1.077932000043802,
         "attempts": 1
       },
       "probe_b": {
@@ -600,22 +600,22 @@
       "via_forwarder": false,
       "nonce_seen": true,
       "evidence_ids": [
-        "t15:abcab8d01a13:A"
+        "t15:2fa65102627a:A"
       ],
       "probe_a": {
-        "qname": "abcab8d01a13.probe.lab.test",
+        "qname": "2fa65102627a.probe.lab.test",
         "qtype": "A",
         "rcode": "NOERROR",
         "flags": {
           "QR": true,
-          "AA": true,
+          "AA": false,
           "TC": false,
-          "RD": false,
-          "RA": false
+          "RD": true,
+          "RA": true
         },
         "transport": "udp",
         "error": null,
-        "response_time_ms": 4.0858049997041235,
+        "response_time_ms": 6.973410000000513,
         "attempts": 1
       },
       "probe_b": {
@@ -639,22 +639,22 @@
       "via_forwarder": false,
       "nonce_seen": true,
       "evidence_ids": [
-        "t16:b7933b3b1cf0:A"
+        "t16:ad696206f2ab:A"
       ],
       "probe_a": {
-        "qname": "b7933b3b1cf0.probe.lab.test",
+        "qname": "ad696206f2ab.probe.lab.test",
         "qtype": "A",
         "rcode": "NOERROR",
         "flags": {
           "QR": true,
-          "AA": true,
+          "AA": false,
           "TC": false,
-          "RD": false,
-          "RA": false
+          "RD": true,
+          "RA": true
         },
         "transport": "tcp",
         "error": null,
-        "response_time_ms": 3.3114960006059846,
+        "response_time_ms": 11.304897999934838,
         "attempts": 1
       },
       "probe_b": {
@@ -678,10 +678,10 @@
       "via_forwarder": false,
       "nonce_seen": false,
       "evidence_ids": [
-        "t17:6c478886f24f:A"
+        "t17:3a2aad804339:A"
       ],
       "probe_a": {
-        "qname": "6c478886f24f.probe.lab.test",
+        "qname": "3a2aad804339.probe.lab.test",
         "qtype": "A",
         "rcode": "NOERROR",
         "flags": {
@@ -693,7 +693,7 @@
         },
         "transport": "udp",
         "error": null,
-        "response_time_ms": 1.2851169994974043,
+        "response_time_ms": 2.1549319999394356,
         "attempts": 1
       },
       "probe_b": {
@@ -717,22 +717,22 @@
       "via_forwarder": false,
       "nonce_seen": true,
       "evidence_ids": [
-        "t18:86661a646c17:A"
+        "t18:935ed3c8c5ef:A"
       ],
       "probe_a": {
-        "qname": "86661a646c17.probe.lab.test",
+        "qname": "935ed3c8c5ef.probe.lab.test",
         "qtype": "A",
         "rcode": "NOERROR",
         "flags": {
           "QR": true,
-          "AA": true,
+          "AA": false,
           "TC": false,
-          "RD": false,
-          "RA": false
+          "RD": true,
+          "RA": true
         },
         "transport": "udp",
         "error": null,
-        "response_time_ms": 1502.9984249995323,
+        "response_time_ms": 1507.9021189999366,
         "attempts": 1
       },
       "probe_b": {
@@ -756,22 +756,22 @@
       "via_forwarder": false,
       "nonce_seen": true,
       "evidence_ids": [
-        "t19:c02d73038a28:A"
+        "t19:e1cbafb8ea4a:A"
       ],
       "probe_a": {
-        "qname": "c02d73038a28.probe.lab.test",
+        "qname": "e1cbafb8ea4a.probe.lab.test",
         "qtype": "A",
         "rcode": "NOERROR",
         "flags": {
           "QR": true,
-          "AA": true,
+          "AA": false,
           "TC": false,
-          "RD": false,
-          "RA": false
+          "RD": true,
+          "RA": true
         },
         "transport": "udp",
         "error": null,
-        "response_time_ms": 2.7013880007871194,
+        "response_time_ms": 7.578863999924579,
         "attempts": 1
       },
       "probe_b": {
@@ -795,10 +795,10 @@
       "via_forwarder": false,
       "nonce_seen": false,
       "evidence_ids": [
-        "t20:4c836ae8129d:A"
+        "t20:c3f94620be72:A"
       ],
       "probe_a": {
-        "qname": "4c836ae8129d.probe.lab.test",
+        "qname": "c3f94620be72.probe.lab.test",
         "qtype": "A",
         "rcode": "REFUSED",
         "flags": {
@@ -810,7 +810,7 @@
         },
         "transport": "udp",
         "error": null,
-        "response_time_ms": 0.8038079995458247,
+        "response_time_ms": 2.0391390000895626,
         "attempts": 1
       },
       "probe_b": {
@@ -821,12 +821,12 @@
           "QR": true,
           "AA": true,
           "TC": false,
-          "RD": true,
+          "RD": false,
           "RA": false
         },
         "transport": "udp",
         "error": null,
-        "response_time_ms": 1.7737529997248203,
+        "response_time_ms": 1.9361229999503848,
         "attempts": 1
       }
     }

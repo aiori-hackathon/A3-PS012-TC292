@@ -1,117 +1,56 @@
-# A3-PS012-TC292 — Authorised DNS Resolver Exposure Assessment
+<!-- logo:begin -->
+<div align="center">
+  <img src="media\logo.png" alt="Binary Beans" width="500" style="max-width: 100%; height: auto; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));">
+</div>
+<!-- logo:end -->
 
-This project assesses DNS recursion only on listed, authorised targets. It
-proves recursion using a unique nonce and evidence from the project's own
-authoritative test-zone server; it does not infer exposure from the RA flag
-alone. Never use it against systems you do not own or have explicit permission
-to test.
+# Authorised DNS Resolver Exposure Assessment
 
-## Terminology (rubric ↔ implementation)
+A professional tool for the nonce-based classification of authorised lab resolvers. It proves recursion using a unique nonce and evidence from a dedicated authoritative test-zone server, ensuring that recursion is proven by actual query forwarding rather than inferred from the RA flag.
 
-The problem statement's vocabulary maps to the implementation as follows:
+<!-- badges:begin -->
+<div align="center">
+  <a href="https://portal.aiori.in/aiori-3/hackathon-guideline/" target="_blank" rel="noopener"><img alt="AIORI 3 Hackathon" src="https://img.shields.io/static/v1?label=AIORI%203&amp;message=Hackathon&amp;color=C55E33&amp;labelColor=38454E&amp;style=for-the-badge"></a>
+  <a href="https://portal.aiori.in/aiori-3/hackathon-guideline/" target="_blank" rel="noopener"><img alt="Problem statement PS-012" src="https://img.shields.io/static/v1?label=problem%20statement&amp;message=PS-012&amp;color=C55E33&amp;labelColor=38454E&amp;style=for-the-badge"></a>
+  <a href="https://portal.aiori.in/aiori-3/hackathon-guideline/" target="_blank" rel="noopener"><img alt="Track 2 Cyber Security" src="https://img.shields.io/static/v1?label=track%202&amp;message=Cyber%20Security&amp;color=C55E33&amp;labelColor=38454E&amp;style=for-the-badge"></a>
+  <br>
+  <a href="https://docs.python.org/" target="_blank" rel="noopener"><img alt="Built with Python" src="https://img.shields.io/static/v1?label=built%20with&amp;message=Python&amp;color=3776AB&amp;labelColor=38454E&amp;style=for-the-badge&amp;logo=python&amp;logoColor=white"></a>
+  <a href="https://docs.astral.sh/uv/" target="_blank" rel="noopener"><img alt="Managed with uv" src="https://img.shields.io/static/v1?label=managed%20with&amp;message=uv&amp;color=4B5563&amp;labelColor=38454E&amp;style=for-the-badge&amp;logo=uv&amp;logoColor=white"></a>
+  <a href="deliverables/report.html" target="_blank" rel="noopener"><img alt="Report Verified" src="https://img.shields.io/static/v1?label=report%20verified&amp;message=20%2F20&amp;color=C55E33&amp;labelColor=5C8D8D&amp;style=for-the-badge"></a>
+</div>
+<!-- badges:end -->
 
-| Term | What it means here | Where it lives |
-|---|---|---|
-| **Canary query** | The **nonce query**: a unique 12-hex-nonce qname under `probe.lab.test`, sent per target. Deterministic from (seed, target, index) — re-runs produce the same names. | `prober.py::make_nonce`, every `evidence.jsonl` row |
-| **Canary evidence** | The auth-zone query log. Recursion is *proven* when the target's forwarded query for the nonce name reaches our zone; matched **by nonce value, not source IP** (the recorded `src_ip` feeds `via_forwarder` detection). | `evidence.py::AuthZoneLogReader`, `classifier.py` |
-| **Canary server** | The team-owned **authoritative `authzone` container** for `probe.lab.test` — it serves the zone and logs every query it receives. | `src/lab/authzone/`, `scope.yaml::test_zone` |
-| **External probe client** | The dedicated **`lab-client` container**, on its own network: every probe leaves its real source IP, independent of the targets and the canary server. | `src/lab/docker-compose.yml`, `cli.py scan` |
-| **Control client** | The controlled `lab-client` is the **only** traffic generator besides target healthchecks (which query each container's own loopback and never reach the canary log). Before every scan it also runs a **canary attribution self-check**: one control query (`selfcheck-…` qname) straight to the canary server must appear in the canary log attributed to the client's own src IP, or the scan refuses to run (`selfcheck.py`, `cli.py` Phase 0). **Structural controls** complete the picture: (1) the canary log is noise-free, so every entry is evidence; (2) the refused fixtures (t02, t04, t12) are *negative controls* — valid REFUSED replies whose nonces correctly never appear in the canary log; (3) probe B (SOA, RD=0) provides a second, independent signal so no label rests on a single query. | `selfcheck.py`, `docker-compose.yml` healthchecks, classifier reasons `both_probes_refused` |
+| Name | Role | Link |
+| :--- | :--- | :--- |
+| Rwitabrato Hanpal | Team lead and core developer| [GitHub](https://github.com/GhostisLive) |
+| Anushka Ghosh | Lab and validation | [GitHub](https://github.com/Code-0ne) |
+| Prof (Dr) Rupayan Das | Faculty Mentor | [GitHub](https://github.com/rupayanacm-ai) |
 
-The five pieces compose the core proof: the **external probe client** sends
-the **canary query**, and only if the target genuinely recurses does the
-**canary server** record **canary evidence**. For the full decision rules see
-[`src/docs/pseudocode.md`](./src/docs/pseudocode.md) and the Limitations below.
+**Team Name:** Binary Beans  
+**Team Code:** A3-PS012-TC292  
+**Presentation:** [`A3-PS012-TC292.pdf`](A3-PS012-TC292.pdf)
+
+## Judge fast path
+
+- [**Report (HTML)**](deliverables/report.html) — Self-contained results report with claims registry and drift checks
+- [**Deck PDF**](A3-PS012-TC292.pdf) — Team presentation deck
+- [**Quickstart**](#quickstart) — Prebuilt viewer or a full native build
+- [**Honest limits**](#honest-limits) — Empirical measurements only; no formal guarantees
 
 ## Live demo
 
 Three ways to review the working demo, fastest first:
 
-1. **Recorded terminal replay (instant, no setup)** —
-   [`deliverables/terminal-replay.html`](./deliverables/terminal-replay.html)
-   replays real recordings of the full demo run (scan → compare → 20/20 →
-   reports), the rate-verification capture, and the kill switch stopping a
-   scan cleanly, with play/pause/scrub controls and no external dependencies.
-2. **Static deliverables (instant, no setup)** — the pre-generated demo
-   artifacts are committed directly in [`deliverables/`](./deliverables) for
-   evaluator review (open the files locally; the landing page is
-   `deliverables/index.html`). It links `report.html`, `results.json`,
-   `results.csv`, the full probe `evidence.jsonl`, and the rate-verification
-   capture.
-3. **Run it yourself (manual setup)** — the tool is a CLI, so this is the
-   genuinely interactive option. Install the two prerequisites, then run:
-
-   - [Docker Engine or Docker Desktop](https://docs.docker.com/get-docker/)
-     (the 22-container lab needs a working Docker daemon: 20 targets,
-     the test-zone canary server, and the separate client), and
-   - [uv](https://docs.astral.sh/uv/getting-started/installation/)
-     (`curl -LsSf https://astral.sh/uv/install.sh | sh`).
-
+1. **Recorded terminal replay (instant, no setup)** — [`deliverables/terminal-replay.html`](./deliverables/terminal-replay.html)
+2. **Static deliverables (instant, no setup)** — the pre-generated demo artifacts are committed directly in [`deliverables/`](./deliverables)
+3. **Run it yourself (manual setup)** — Install Docker and uv, then run:
    ```sh
-   make lab-up      # or let make demo do this
-   make demo        # lab up -> scan -> compare -> reports
+   make demo
    ```
 
-   (without Make: `uv run --directory src python run_demo.py`, which is
-   exactly what `make demo` invokes)
+## Headline results
 
-## One-command demo
-
-From the repository root, with Docker Desktop running:
-
-```powershell
-uv run --directory src python run_demo.py
-```
-
-The runner builds and waits for the Compose lab, scans from the dedicated
-client container, compares against the seeded ground truth, prints the
-confusion matrix, and generates JSON, CSV, and HTML reports under `src/out/`.
-It stops and returns a failure status if any step fails.
-
-If GNU Make is installed, `make demo` invokes the same `uv`-managed runner.
-Run unit and lab tests with:
-
-```powershell
-uv run pytest
-```
-
-### How long a run takes
-
-One full demo takes **about 25–30 seconds** of lab time (plus the one-off
-image build). Most targets finish in milliseconds, and the slower parts are
-expected, not a hang:
-
-- t13 (drop-everything fixture) times out at 3 s per attempt, with up to
-  3 attempts per probe (`max_queries_per_target`: 3) — up to ~9 s per probe.
-- The scan polls the auth-zone log for up to `--log-wait` seconds (default 6)
-  for nonce evidence that never arrives (t13, t17); that adds up to ~6 s.
-- Every query otherwise waits on the 1 qps per-target limiter, so 20 targets
-  × 2 probes take their share of the 5 qps global budget.
-
-This duration grew from ~17 s in earlier versions when UDP retries and the
-polling `--log-wait` replaced a fixed 2 s sleep; the increase is the corrected
-retry policy and the configurable evidence wait, not added load. Lower
-`--log-wait` (e.g. `--log-wait 2`) shortens a run at the risk of missing late
-log entries.
-
-### What the lab is (and is not)
-
-The 20 target containers are **Python emulations that reproduce the query
-behaviour of common DNS software** (an open / closed / authoritative-only /
-forwarding resolver, a packet dropper, a truncating server, a rate limiter,
-etc. — the t0* fixture names reference those behaviours). They are **not**
-official BIND, Unbound, NSD, Knot, or PowerDNS container images. Validating
-the classifier against real upstream images is explicitly future work; the
-tool itself only speaks standard DNS either way.
-
-## Corrected lab results
-
-The first lab run scored **19/20**. The mismatch was t02: the supposedly
-closed resolver also hosted an authoritative zone, so the SOA probe received
-an authoritative answer and the classifier returned `Authoritative-only`. We
-corrected the fixture by removing that zone and keeping recursion limited to
-localhost. Both probes now receive `REFUSED`; the corrected seeded run scored
-**20/20**.
+The tool achieved **20/20** agreement with the known seeded lab.
 
 | Ground truth \ Predicted | Recursive | Authoritative-only | Refused | Inconclusive |
 |---|---:|---:|---:|---:|
@@ -120,30 +59,46 @@ localhost. Both probes now receive `REFUSED`; the corrected seeded run scored
 | Refused | 0 | 0 | 3 | 0 |
 | Inconclusive | 0 | 0 | 0 | 3 |
 
-This is agreement with the known seeded lab, not proof the tool is perfect on
-other DNS deployments.
+## Quickstart
 
-### Repeat-run observations
+The tool is a CLI that manages a 22-container lab environment.
 
-Three scans using `seed-A` agreed on all **20/20 labels**. Four further scans
-with different seeds (A–D) also each scored **20/20**, including t19.
+### One-command demo
+From the repository root, with Docker Desktop running:
 
-Those earlier observations are reproduced on a later code state in
-[`deliverables/stability-summary.json`](./deliverables/stability-summary.json):
-three consecutive runs with seed `stab-A` plus one run with seed `stab-B`
-produced **identical labels for all 20 targets**, with probe attempts of 1
-everywhere except the timeout-modeled t13 (3, the configured cap).
+```powershell
+uv run --directory src python run_demo.py
+```
 
-| Seed | t19 packet-loss | t19 UDP attempts | t13 attempts (timeout model) |
-|---|---|---|---|
-| `seed-A` | Recursive | 1 | 3 |
-| `seed-B` | Recursive | 1 | 3 |
-| `seed-C` | Recursive | 2 (retry recovered) | 3 |
-| `seed-D` | Recursive | 2 (retry recovered) | 3 |
+The runner builds the Compose lab, scans from the dedicated client container, compares against ground truth, and generates reports under `src/out/`.
 
-Earlier versions of the tool sent each UDP probe once, so t19's
-deterministic (nonce-keyed) loss made its label depend on the seed: seeds C
-and D produced `Inconclusive`. Two fixes removed that dependence:
+## Terminology (rubric ↔ implementation)
+
+| Term | What it means here | Where it lives |
+|---|---|---|
+| **Canary query** | The **nonce query**: a unique 12-hex-nonce qname under `probe.lab.test`. | `prober.py::make_nonce` |
+| **Canary evidence** | The auth-zone query log. Recursion is *proven* when the target's forwarded query reaches our zone. | `evidence.py`, `classifier.py` |
+| **Canary server** | The team-owned **authoritative `authzone` container** for `probe.lab.test`. | `src/lab/authzone/` |
+| **External probe client** | The dedicated **`lab-client` container**, on its own network. | `src/lab/docker-compose.yml` |
+| **Control client** | The controlled `lab-client` used for canary attribution self-checks. | `selfcheck.py` |
+
+## Repository map
+
+- `src/` — Core implementation
+  - `cli.py` — Command line interface
+  - `prober.py` — DNS probing logic
+  - `classifier.py` — Labeling logic based on evidence
+  - `evidence.py` — Log parsing and evidence extraction
+  - `lab/` — Dockerized lab environment
+- `deliverables/` — Final reports and demo artifacts
+- `tests/` — Unit and integration tests
+
+## Honest limits
+
+- **Emulated Targets**: The lab uses Python emulations of DNS behavior, not official BIND/Unbound images.
+- **Network Isolation**: Assumes a controlled lab environment; real-world network noise may affect timing.
+- **Scope**: Limited to the specific fixtures defined in the problem statement.
+s Cand D produced `Inconclusive`. Two fixes removed that dependence:
 
 1. The prober now retries a timed-out UDP probe up to `udp_retries` times
    (`rate.yaml`, default 2), re-waiting on the rate limiter and reusing the
