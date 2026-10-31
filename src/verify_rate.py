@@ -60,7 +60,7 @@ def parse_capture(output: str) -> dict[str, list[float]]:
 def _start_capture(container: str) -> None:
     command = (
         f"rm -f {CAPTURE_LOG} {CAPTURE_PID}; "
-        "tcpdump -l -nn -tt -i eth1 "
+        "tcpdump -l -nn -tt -Q out -i any "
         f"'src host {LAB_CLIENT_IP} and dst net 172.28.0.0/24 and "
         "(udp dst port 53 or tcp dst port 53)' "
         f"> {CAPTURE_LOG} 2>&1 & echo $! > {CAPTURE_PID}"

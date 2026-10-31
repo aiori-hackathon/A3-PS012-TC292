@@ -4,6 +4,15 @@
 </div>
 <!-- logo:end -->
 
+<div align="center">
+  <a href="https://youtu.be/CjcViFnXcMQ" target="_blank" rel="noopener" style="margin-right: 12px; display: inline-block;">
+    <img alt="Project demo video" src="https://img.shields.io/badge/YouTube-Project%20Demo-red?logo=youtube&logoColor=white&style=for-the-badge" />
+  </a>
+  <a href="https://youtu.be/d-ecCpZZQyw" target="_blank" rel="noopener" style="display: inline-block;">
+    <img alt="Introductory video" src="https://img.shields.io/badge/YouTube-Introductory%20Video-red?logo=youtube&logoColor=white&style=for-the-badge" />
+  </a>
+</div>
+
 # Authorised DNS Resolver Exposure Assessment
 
 A professional tool for the nonce-based classification of authorised lab resolvers. It proves recursion using a unique nonce and evidence from a dedicated authoritative test-zone server, ensuring that recursion is proven by actual query forwarding rather than inferred from the RA flag.
@@ -30,13 +39,6 @@ A professional tool for the nonce-based classification of authorised lab resolve
 **Team Code:** A3-PS012-TC292  
 **Presentation:** [`A3-PS012-TC292.pdf`](A3-PS012-TC292.pdf)
 
-## Judge fast path
-
-- [**Report (HTML)**](deliverables/report.html) — Self-contained results report with claims registry and drift checks
-- [**Deck PDF**](A3-PS012-TC292.pdf) — Team presentation deck
-- [**Quickstart**](#quickstart) — Prebuilt viewer or a full native build
-- [**Honest limits**](#honest-limits) — Empirical measurements only; no formal guarantees
-
 ## Live demo
 
 Three ways to review the working demo, fastest first:
@@ -47,6 +49,17 @@ Three ways to review the working demo, fastest first:
    ```sh
    make demo
    ```
+
+## Open the deliverables
+
+To view the generated report in a browser, either:
+
+- Open the report directly: [`deliverables/report.html`](./deliverables/report.html)
+- Or serve the repo locally and browse to the deliverables folder:
+  ```sh
+  uv run python -m http.server 8000
+  ```
+  Then visit: `http://localhost:8000/deliverables/`
 
 ## Headline results
 
@@ -149,3 +162,7 @@ same rate limiter and count toward the `max_queries_per_target` and
 
 For detailed Phase 4 usage, see [src/README.md](./src/README.md). The short
 implementation outline is [src/docs/pseudocode.md](./src/docs/pseudocode.md).
+
+<div align="center">
+  <strong>Don't guess exposure, prove it.</strong>
+</div>
